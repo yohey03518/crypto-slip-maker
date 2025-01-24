@@ -1,57 +1,49 @@
-import axios from 'axios';
+import { MaxApiService } from './services/MaxApiService.js';
+import { logger } from './utils/logger.js';
+import { config } from 'dotenv';
 
-const MAX_API_BASE_URL = 'https://max-api.maicoin.com';
+// Load environment variables
+config();
 
-// Helper function to format timestamp
-const getTimestamp = (): string => `[${new Date().toISOString()}]`;
-
-// Interface for the API response
-interface MaxMarketDepthResponse {
-    timestamp: number;
-    last_update_version: number;
-    last_update_id: number;
-    asks: [string, string][]; // [price, amount][]
-    bids: [string, string][]; // [price, amount][]
-}
-
-// Function to fetch USDT/TWD price
-async function fetchUSDTPrice(): Promise<MaxMarketDepthResponse> {
-    try {
-        console.log(`${getTimestamp()} Starting price fetch...`);
-        
-        const response = await axios.get<MaxMarketDepthResponse>(
-            `${MAX_API_BASE_URL}/api/v3/depth`, {
-                params: {
-                    market: 'usdttwd',
-                    limit: 5
-                }
-            }
-        );
-        
-        console.log(response.data);
-        return response.data;
-    } catch (error) {
-        console.error(`${getTimestamp()} Error fetching price:`, error instanceof Error ? error.message : 'Unknown error');
-        throw error;
+const validateEnvVariables = () => {
+    const required = ['MAX_API_BASE_URL', 'MAX_ACCESS_KEY', 'MAX_SECRET_KEY'];
+    const missing = required.filter(key => !process.env[key]);
+    
+    if (missing.length > 0) {
+        throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
     }
-}
+};
 
-// Main execution
 async function main(): Promise<void> {
     try {
-        const marketDepth = await fetchUSDTPrice();
+        validateEnvVariables();
+
+        const maxApiService = new MaxApiService({
+            apiBaseUrl: process.env.MAX_API_BASE_URL!,
+            accessKey: process.env.MAX_ACCESS_KEY!,
+            secretKey: process.env.MAX_SECRET_KEY!
+        });
+
+        // Fetch USDT price
+        const marketDepth = await maxApiService.fetchUSDTPrice();
         
-        // Get highest bid by sorting bids by price in descending order
-        const highestBid = marketDepth.bids.sort((a, b) => parseFloat(b[0]) - parseFloat(a[0]))[0][0];
+        // Get highest bid and lowest ask
+        const highestBid = Math.max(...marketDepth.bids.map((bid: [string, string]) => parseFloat(bid[0])));
+        const lowestAsk = Math.min(...marketDepth.asks.map((ask: [string, string]) => parseFloat(ask[0])));
         
-        // Get lowest ask by sorting asks by price in ascending order
-        const lowestAsk = marketDepth.asks.sort((a, b) => parseFloat(a[0]) - parseFloat(b[0]))[0][0];
+        logger.info(`Highest Bid: ${highestBid} TWD`);
+        logger.info(`Lowest Ask: ${lowestAsk} TWD`);
         
-        console.log(`${getTimestamp()} Highest Bid: ${highestBid} TWD`);
-        console.log(`${getTimestamp()} Lowest Ask: ${lowestAsk} TWD`);
-        console.log(`${getTimestamp()} Task completed`);
+        // Fetch user information
+        const userInfo = await maxApiService.fetchUserInfo();
+        logger.info(`User email: ${userInfo.email}`);
+        logger.info(`User level: ${userInfo.level}`);
+        logger.info(`M-Wallet enabled: ${userInfo.m_wallet_enabled}`);
+        
+        logger.info('Task completed');
     } catch (error) {
-        console.error(`${getTimestamp()} Script failed`);
+        logger.error('Script failed:', error instanceof Error ? error.message : 'Unknown error');
+        process.exit(1);
     }
 }
 
