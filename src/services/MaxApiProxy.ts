@@ -55,7 +55,7 @@ interface MaxOrderDetail {
     updated_at: number;
 }
 
-export class MaxApiService {
+export class MaxApiProxy {
     private readonly config: MaxApiConfig;
 
     constructor(config: MaxApiConfig) {
@@ -75,15 +75,16 @@ export class MaxApiService {
         };
     }
 
-    async fetchUSDTPrice(): Promise<MaxMarketDepthResponse> {
+    async fetchMarketDepth(currency: string): Promise<MaxMarketDepthResponse> {
         try {
-            logger.info('Starting price fetch...');
+            const market = `${currency.toLowerCase()}twd`;
+            logger.info(`Starting price fetch for ${currency} in market: ${market}...`);
             
             const response = await axios.get<MaxMarketDepthResponse>(
                 `${this.config.apiBaseUrl}/api/v3/depth`,
                 {
                     params: {
-                        market: 'usdttwd',
+                        market,
                         limit: 5
                     }
                 }
@@ -96,17 +97,7 @@ export class MaxApiService {
         }
     }
 
-    private handleApiError(message: string, error: unknown): void {
-        if (error instanceof AxiosError) {
-            logger.error(`${message}: ${error.message}`);
-            logger.error('Response body:', error.response?.data);
-        } else if (error instanceof Error) {
-            logger.error(`${message}: ${error.message}`);
-        } else {
-            logger.error(`${message}: Unknown error`);
-        }
-    }
-    async fetchWalletBalance(): Promise<Array<{
+    async fetchWalletBalance(currency: string): Promise<Array<{
         currency: string;
         balance: string;
         locked: string;
@@ -121,7 +112,7 @@ export class MaxApiService {
             const payloadObj = {
                 nonce: Date.now(),
                 path,
-                currency: 'usdt'
+                currency: currency
             };
             
             const response = await axios.get(
@@ -184,6 +175,17 @@ export class MaxApiService {
         } catch (error) {
             this.handleApiError('Error fetching order detail', error);
             throw error;
+        }
+    }
+
+    private handleApiError(message: string, error: unknown): void {
+        if (error instanceof AxiosError) {
+            logger.error(`${message}: ${error.message}`);
+            logger.error('Response body:', error.response?.data);
+        } else if (error instanceof Error) {
+            logger.error(`${message}: ${error.message}`);
+        } else {
+            logger.error(`${message}: Unknown error`);
         }
     }
 } 
