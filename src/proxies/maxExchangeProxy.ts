@@ -1,8 +1,10 @@
 import axios, { AxiosError } from 'axios';
 import { createHmac } from 'crypto';
 import * as qs from 'qs';
-import { MaxApiConfig, MaxMarketDepthResponse } from '../types.js';
+import { TradingCurrency } from '../types.js';
+import { MaxApiConfig, MaxMarketDepthResponse } from './maxTypes.js';
 import { logger } from '../utils/logger.js';
+import { setupMaxApiInterceptors } from './maxApiInterceptor.js';
 
 interface MaxOrderRequest {
     market: string;
@@ -55,11 +57,16 @@ interface MaxOrderDetail {
     updated_at: number;
 }
 
-export class MaxApiProxy {
+export class MaxApi {
     private readonly config: MaxApiConfig;
+    private readonly axiosInstance;
 
     constructor(config: MaxApiConfig) {
         this.config = config;
+        this.axiosInstance = axios.create({
+            baseURL: this.config.apiBaseUrl
+        });
+        setupMaxApiInterceptors(this.axiosInstance);
     }
 
     private generateAuthHeaders(payloadObj: Record<string, any>): Record<string, string> {
@@ -75,13 +82,12 @@ export class MaxApiProxy {
         };
     }
 
-    async fetchMarketDepth(currency: string): Promise<MaxMarketDepthResponse> {
+    async fetchMarketDepth(currency: TradingCurrency): Promise<MaxMarketDepthResponse> {
         try {
             const market = `${currency.toLowerCase()}twd`;
-            logger.info(`Starting price fetch for ${currency} in market: ${market}...`);
             
-            const response = await axios.get<MaxMarketDepthResponse>(
-                `${this.config.apiBaseUrl}/api/v3/depth`,
+            const response = await this.axiosInstance.get<MaxMarketDepthResponse>(
+                '/api/v3/depth',
                 {
                     params: {
                         market,
@@ -97,7 +103,7 @@ export class MaxApiProxy {
         }
     }
 
-    async fetchWalletBalance(currency: string): Promise<Array<{
+    async fetchWalletBalance(currency: TradingCurrency): Promise<Array<{
         currency: string;
         balance: string;
         locked: string;
@@ -106,8 +112,6 @@ export class MaxApiProxy {
         interest: string;
     }>> {
         try {
-            logger.info('Fetching wallet balance...');
-            
             const path = '/api/v3/wallet/spot/accounts';
             const payloadObj = {
                 nonce: Date.now(),
@@ -115,9 +119,12 @@ export class MaxApiProxy {
                 currency: currency
             };
             
-            const response = await axios.get(
-                `${this.config.apiBaseUrl}${path}?${qs.stringify(payloadObj, {arrayFormat: 'brackets'})}`,
-                { headers: this.generateAuthHeaders(payloadObj) }
+            const response = await this.axiosInstance.get(
+                path,
+                { 
+                    params: payloadObj,
+                    headers: this.generateAuthHeaders(payloadObj)
+                }
             );
             
             return response.data;
@@ -129,8 +136,6 @@ export class MaxApiProxy {
 
     async placeOrder(orderRequest: MaxOrderRequest): Promise<MaxOrderResponse> {
         try {
-            logger.info('Placing order...');
-            
             const path = '/api/v3/wallet/spot/order';
             const payloadObj = {
                 nonce: Date.now(),
@@ -138,8 +143,8 @@ export class MaxApiProxy {
                 ...orderRequest
             };
             
-            const response = await axios.post<MaxOrderResponse>(
-                `${this.config.apiBaseUrl}${path}`,
+            const response = await this.axiosInstance.post<MaxOrderResponse>(
+                path,
                 payloadObj,
                 { 
                     headers: {
@@ -149,7 +154,6 @@ export class MaxApiProxy {
                 }
             );
             
-            logger.info('Order placed successfully');
             return response.data;
         } catch (error) {
             this.handleApiError('Error placing order', error);
@@ -166,9 +170,12 @@ export class MaxApiProxy {
                 id: orderId
             };
             
-            const response = await axios.get<MaxOrderDetail>(
-                `${this.config.apiBaseUrl}${path}?${qs.stringify(payloadObj, {arrayFormat: 'brackets'})}`,
-                { headers: this.generateAuthHeaders(payloadObj) }
+            const response = await this.axiosInstance.get<MaxOrderDetail>(
+                path,
+                { 
+                    params: payloadObj,
+                    headers: this.generateAuthHeaders(payloadObj)
+                }
             );
             
             return response.data;
@@ -179,10 +186,7 @@ export class MaxApiProxy {
     }
 
     private handleApiError(message: string, error: unknown): void {
-        if (error instanceof AxiosError) {
-            logger.error(`${message}: ${error.message}`);
-            logger.error('Response body:', error.response?.data);
-        } else if (error instanceof Error) {
+        if (error instanceof Error) {
             logger.error(`${message}: ${error.message}`);
         } else {
             logger.error(`${message}: Unknown error`);

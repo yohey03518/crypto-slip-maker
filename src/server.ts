@@ -1,12 +1,14 @@
-import { MaxApiProxy } from './services/MaxApiProxy.js';
+import { MaxApi } from './proxies/maxExchangeProxy.js';
 import { logger } from './utils/logger.js';
 import { config } from 'dotenv';
+import { TradingCurrency } from './types.js';
 
 // Load environment variables
 config();
 
-const MIN_TRADING_AMOUNTS: Record<string, string> = {
+const MIN_TRADING_AMOUNTS: Record<TradingCurrency, string> = {
   'usdt': '8.10', // 8 is the min amount of usdt order, add 0.1 to make it greater than 8 when selling (minus fee)
+  'btc': '0.0001', // Adding minimum amount for BTC
   // Add other currencies' minimum amounts here as needed
 };
 
@@ -25,27 +27,24 @@ async function main(): Promise<void> {
   try {
     validateEnvVariables();
 
-    const TRADING_CURRENCY = 'usdt';
+    const TRADING_CURRENCY: TradingCurrency = 'usdt';
     const MARKET = `${TRADING_CURRENCY}twd`;
 
     if (!MIN_TRADING_AMOUNTS[TRADING_CURRENCY]) {
       throw new Error(`No minimum trading amount defined for ${TRADING_CURRENCY}`);
     }
 
-    const maxApiProxy = new MaxApiProxy({
+    const maxApiProxy = new MaxApi({
       apiBaseUrl: process.env.MAX_API_BASE_URL!,
       accessKey: process.env.MAX_ACCESS_KEY!,
       secretKey: process.env.MAX_SECRET_KEY!
     });
 
     const marketDepth = await maxApiProxy.fetchMarketDepth(TRADING_CURRENCY);
-
     const lowestSellPrice = Math.min(...marketDepth.asks.map((ask: [string, string]) => parseFloat(ask[0])));
-
     logger.info(`Lowest Sell Price: ${lowestSellPrice} TWD`);
 
     const walletBalance = await maxApiProxy.fetchWalletBalance(TRADING_CURRENCY);
-    logger.info('Wallet Balance:', JSON.stringify(walletBalance, null, 2));
     const orderRequest = {
       market: MARKET,
       side: 'buy' as const,
@@ -55,8 +54,6 @@ async function main(): Promise<void> {
     };
 
     const orderResult = await maxApiProxy.placeOrder(orderRequest);
-    logger.info('Order placed:', JSON.stringify(orderResult, null, 2));
-
     const startTime = Date.now();
     let orderDetail;
     
@@ -75,13 +72,9 @@ async function main(): Promise<void> {
         
         await new Promise(resolve => setTimeout(resolve, 500));
     }
-    
-    logger.info('Final buy order details:', JSON.stringify(orderDetail, null, 2));
 
     if (orderDetail.state === 'done') {
-        // Get updated wallet balance after buy order
         const updatedWalletBalance = await maxApiProxy.fetchWalletBalance(TRADING_CURRENCY);
-        logger.info('Updated Wallet Balance:', JSON.stringify(updatedWalletBalance, null, 2));
 
         // Calculate volume difference
         const initialBalance = walletBalance.find(b => b.currency === TRADING_CURRENCY)?.balance || '0';
@@ -100,9 +93,7 @@ async function main(): Promise<void> {
                 ord_type: 'limit' as const
             };
 
-            logger.info('Placing sell order:', JSON.stringify(sellOrderRequest, null, 2));
             const sellOrderResult = await maxApiProxy.placeOrder(sellOrderRequest);
-            logger.info('Sell order placed:', JSON.stringify(sellOrderResult, null, 2));
 
             // Monitor sell order status
             const sellStartTime = Date.now();
