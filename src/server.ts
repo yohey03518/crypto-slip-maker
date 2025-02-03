@@ -10,6 +10,8 @@ const MIN_TRADING_AMOUNTS: Record<string, string> = {
   // Add other currencies' minimum amounts here as needed
 };
 
+const ORDER_MONITORING_TIMEOUT_MS = 60000; 
+
 const validateEnvVariables = () => {
   const required = ['MAX_API_BASE_URL', 'MAX_ACCESS_KEY', 'MAX_SECRET_KEY'];
   const missing = required.filter(key => !process.env[key]);
@@ -66,8 +68,8 @@ async function main(): Promise<void> {
             break;
         }
         
-        if (Date.now() - startTime > 10000) {
-            logger.info('Order monitoring timed out after 10 seconds');
+        if (Date.now() - startTime > ORDER_MONITORING_TIMEOUT_MS) {
+            logger.info(`Order monitoring timed out after ${ORDER_MONITORING_TIMEOUT_MS / 1000} seconds`);
             break;
         }
         
@@ -114,8 +116,8 @@ async function main(): Promise<void> {
                     break;
                 }
                 
-                if (Date.now() - sellStartTime > 10000) {
-                    logger.info('Sell order monitoring timed out after 10 seconds');
+                if (Date.now() - sellStartTime > ORDER_MONITORING_TIMEOUT_MS) {
+                    logger.info(`Sell order monitoring timed out after ${ORDER_MONITORING_TIMEOUT_MS / 1000} seconds`);
                     break;
                 }
                 
