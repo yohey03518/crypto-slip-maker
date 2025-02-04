@@ -24,4 +24,5 @@ export interface MaxApiConfig {
     apiBaseUrl: string;
     accessKey: string;
     secretKey: string;
+    quoteCurrency: string;
 }
