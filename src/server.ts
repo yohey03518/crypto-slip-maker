@@ -41,7 +41,6 @@ async function main(): Promise<void> {
     logger.info(`Lowest Sell Price: ${lowestSellPrice} ${QUOTE_CURRENCY.toUpperCase()}`);
 
     const walletBalance = await maxApiProxy.fetchWalletBalance(TRADING_CURRENCY);
-
     const orderResult = await maxApiProxy.placeOrder({
       currency: TRADING_CURRENCY,
       side: 'buy',
@@ -69,7 +68,8 @@ async function main(): Promise<void> {
 
     if (orderDetail.state === 'done') {
         const updatedWalletBalance = await maxApiProxy.fetchWalletBalance(TRADING_CURRENCY);
-        const balanceDiff = (updatedWalletBalance - walletBalance).toFixed(2);
+        // round down to 2 decimal places to prevent deduct the balance more than the actual balance
+        const balanceDiff = (Math.floor((updatedWalletBalance - walletBalance) * 100) / 100).toFixed(2);
 
         if (parseFloat(balanceDiff) > 0) {
             const latestPrice = await maxApiProxy.fetchMarketDepth(TRADING_CURRENCY);
