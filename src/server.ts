@@ -69,8 +69,8 @@ async function main(): Promise<void> {
     if (orderDetail.state === 'done') {
         await new Promise(resolve => setTimeout(resolve, 1000));
         const updatedWalletBalance = await maxApiProxy.fetchWalletBalance(TRADING_CURRENCY);
-        // round down to 2 decimal places to prevent deduct the balance more than the actual balance
-        const balanceDiff = (Math.floor((updatedWalletBalance - walletBalance) * 100) / 100).toFixed(2);
+        // round down to prevent deduct the balance more than the actual balance
+        const balanceDiff = (Math.floor((updatedWalletBalance - walletBalance) * 100) / 100).toFixed(4);
 
         if (parseFloat(balanceDiff) > 0) {
             const latestPrice = await maxApiProxy.fetchMarketDepth(TRADING_CURRENCY);
