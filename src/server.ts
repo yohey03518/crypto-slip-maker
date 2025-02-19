@@ -7,7 +7,7 @@ import { TradingCurrency } from './types.js';
 config();
 
 const MIN_TRADING_AMOUNTS: Record<TradingCurrency, number> = {
-  'usdt': 8.1, // 8 is the min amount of usdt order, add 0.1 to make it greater than 8 when selling (minus fee)
+  'usdt': 8.02, // 8 is the min amount of usdt order, add a little more to make it greater than 8 when selling (minus fee)
   'btc': 0.0001, // Adding minimum amount for BTC
   // Add other currencies' minimum amounts here as needed
 };
