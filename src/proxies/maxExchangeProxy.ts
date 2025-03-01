@@ -12,6 +12,7 @@ import {
 import { logger } from '../utils/logger.js';
 import { setupMaxApiInterceptors } from './maxApiInterceptor.js';
 import { MarketDepthResponse, PriceLevel } from '../types/marketDepth.js';
+import { Order, Status } from '../types/order.js';
 
 export class MaxApi {
     private readonly config: MaxApiConfig;
@@ -101,7 +102,33 @@ export class MaxApi {
         }
     }
 
-    async placeOrder(orderRequest: OrderRequest): Promise<MaxOrderDetail> {
+    /**
+     * Maps MAX exchange specific order states to standardized Status
+     */
+    private mapOrderState(state: MaxOrderDetail['state']): Status {
+        switch (state) {
+            case 'done':
+                return 'completed';
+            case 'cancel':
+                return 'cancelled';
+            case 'wait':
+                return 'pending';
+            default:
+                return 'other';
+        }
+    }
+
+    /**
+     * Converts MAX order detail to standardized Order type
+     */
+    private convertToOrder(maxOrder: MaxOrderDetail): Order {
+        return {
+            id: maxOrder.id.toString(),
+            status: this.mapOrderState(maxOrder.state)
+        };
+    }
+
+    async placeOrder(orderRequest: OrderRequest): Promise<Order> {
         try {
             const maxOrderRequest = {
                 market: this.getMarketPair(orderRequest.currency),
@@ -129,14 +156,14 @@ export class MaxApi {
                 }
             );
             
-            return response.data;
+            return this.convertToOrder(response.data);
         } catch (error) {
             this.handleApiError('Error placing order', error);
             throw error;
         }
     }
 
-    async getOrderDetail(orderId: number): Promise<MaxOrderDetail> {
+    async getOrderDetail(orderId: number): Promise<Order> {
         try {
             const path = '/api/v3/order';
             const payloadObj = {
@@ -153,7 +180,7 @@ export class MaxApi {
                 }
             );
             
-            return response.data;
+            return this.convertToOrder(response.data);
         } catch (error) {
             this.handleApiError('Error fetching order detail', error);
             throw error;

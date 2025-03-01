@@ -2,6 +2,7 @@ import { MaxApi } from './proxies/maxExchangeProxy.js';
 import { logger } from './utils/logger.js';
 import { config } from 'dotenv';
 import { TradingCurrency } from './types.js';
+import { Order } from './types/order.js';
 
 // Load environment variables
 config();
@@ -41,7 +42,6 @@ async function main(): Promise<void> {
     logger.info(`Lowest Sell Price: ${lowestSellPrice} ${QUOTE_CURRENCY.toUpperCase()}`);
 
     const walletBalance = await maxApiProxy.fetchWalletBalance(TRADING_CURRENCY);
-    return;
     const orderResult = await maxApiProxy.placeOrder({
       currency: TRADING_CURRENCY,
       side: 'buy',
@@ -49,13 +49,13 @@ async function main(): Promise<void> {
       price: lowestSellPrice,
     });
     const startTime = Date.now();
-    let orderDetail;
+    let orderDetail: Order;
     
     while (true) {
-        orderDetail = await maxApiProxy.getOrderDetail(orderResult.id);
-        logger.info('Order status:', orderDetail.state);
+        orderDetail = await maxApiProxy.getOrderDetail(parseInt(orderResult.id));
+        logger.info('Order status:', orderDetail.status);
         
-        if (orderDetail.state === 'done' || orderDetail.state === 'cancel') {
+        if (orderDetail.status === 'completed' || orderDetail.status === 'cancelled') {
             break;
         }
         
@@ -67,7 +67,7 @@ async function main(): Promise<void> {
         await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    if (orderDetail.state === 'done') {
+    if (orderDetail.status === 'completed') {
         await new Promise(resolve => setTimeout(resolve, 1000));
         const updatedWalletBalance = await maxApiProxy.fetchWalletBalance(TRADING_CURRENCY);
         // round down to prevent deduct the balance more than the actual balance
@@ -90,13 +90,13 @@ async function main(): Promise<void> {
 
             // Monitor sell order status
             const sellStartTime = Date.now();
-            let sellOrderDetail;
+            let sellOrderDetail: Order;
             
             while (true) {
-                sellOrderDetail = await maxApiProxy.getOrderDetail(sellOrderResult.id);
-                logger.info('Sell order status:', sellOrderDetail.state);
+                sellOrderDetail = await maxApiProxy.getOrderDetail(parseInt(sellOrderResult.id));
+                logger.info('Sell order status:', sellOrderDetail.status);
                 
-                if (sellOrderDetail.state === 'done' || sellOrderDetail.state === 'cancel') {
+                if (sellOrderDetail.status === 'completed' || sellOrderDetail.status === 'cancelled') {
                     break;
                 }
                 
