@@ -41,6 +41,7 @@ async function main(): Promise<void> {
     logger.info(`Lowest Sell Price: ${lowestSellPrice} ${QUOTE_CURRENCY.toUpperCase()}`);
 
     const walletBalance = await maxApiProxy.fetchWalletBalance(TRADING_CURRENCY);
+    return;
     const orderResult = await maxApiProxy.placeOrder({
       currency: TRADING_CURRENCY,
       side: 'buy',

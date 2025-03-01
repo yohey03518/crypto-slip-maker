@@ -2,70 +2,16 @@ import axios, { AxiosError } from 'axios';
 import { createHmac } from 'crypto';
 import * as qs from 'qs';
 import { OrderRequest, TradingCurrency } from '../types.js';
-import { MaxApiConfig, MaxMarketDepthResponse } from './maxTypes.js';
+import { 
+    MaxApiConfig, 
+    MaxMarketDepthResponse,
+    MaxOrderRequest,
+    MaxOrderDetail,
+    MaxWalletBalanceItem
+} from './maxTypes.js';
 import { logger } from '../utils/logger.js';
 import { setupMaxApiInterceptors } from './maxApiInterceptor.js';
 import { MarketDepthResponse, PriceLevel } from '../types/marketDepth.js';
-
-interface MaxOrderRequest {
-    market: string;
-    side: 'buy' | 'sell';
-    volume: string;
-    price?: string;
-    client_oid?: string;
-    stop_price?: string;
-    ord_type: 'limit' | 'market' | 'stop_limit' | 'stop_market' | 'post_only' | 'ioc_limit';
-    group_id?: number;
-}
-
-interface MaxOrderResponse {
-    id: number;
-    wallet_type: string;
-    market: string;
-    client_oid: string;
-    group_id: number;
-    side: 'buy' | 'sell';
-    state: string;
-    ord_type: string;
-    price: string;
-    stop_price: string;
-    avg_price: string;
-    volume: string;
-    remaining_volume: string;
-    executed_volume: string;
-    trades_count: number;
-    created_at: number;
-    updated_at: number;
-}
-
-interface MaxOrderDetail {
-    id: number;
-    wallet_type: string;
-    market: string;
-    client_oid: string;
-    group_id: number;
-    side: 'buy' | 'sell';
-    state: 'wait' | 'done' | 'cancel' | 'convert';
-    ord_type: string;
-    price: string;
-    stop_price: string;
-    avg_price: string;
-    volume: string;
-    remaining_volume: string;
-    executed_volume: string;
-    trades_count: number;
-    created_at: number;
-    updated_at: number;
-}
-
-interface WalletBalanceItem {
-    currency: string;
-    balance: string;
-    locked: string;
-    staked: string;
-    principal: string;
-    interest: string;
-}
 
 export class MaxApi {
     private readonly config: MaxApiConfig;
@@ -147,7 +93,7 @@ export class MaxApi {
                 }
             );
             
-            const balance = response.data.find((b: WalletBalanceItem) => b.currency === currency)?.balance || '0';
+            const balance = response.data.find((b: MaxWalletBalanceItem) => b.currency === currency)?.balance || '0';
             return parseFloat(balance);
         } catch (error) {
             this.handleApiError('Error fetching wallet balance', error);
@@ -155,7 +101,7 @@ export class MaxApi {
         }
     }
 
-    async placeOrder(orderRequest: OrderRequest): Promise<MaxOrderResponse> {
+    async placeOrder(orderRequest: OrderRequest): Promise<MaxOrderDetail> {
         try {
             const maxOrderRequest = {
                 market: this.getMarketPair(orderRequest.currency),
@@ -172,7 +118,7 @@ export class MaxApi {
                 ...maxOrderRequest
             };
             
-            const response = await this.axiosInstance.post<MaxOrderResponse>(
+            const response = await this.axiosInstance.post<MaxOrderDetail>(
                 path,
                 payloadObj,
                 { 
