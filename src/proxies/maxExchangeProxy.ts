@@ -13,8 +13,9 @@ import { logger } from '../utils/logger.js';
 import { setupMaxApiInterceptors } from './maxApiInterceptor.js';
 import { MarketDepthResponse, PriceLevel } from '../types/marketDepth.js';
 import { Order, Status } from '../types/order.js';
+import { ExchangeApi } from '../types/exchange.js';
 
-export class MaxApi {
+export class MaxApi implements ExchangeApi {
     private readonly config: MaxApiConfig;
     private readonly axiosInstance;
     private readonly quoteCurrency: string;
