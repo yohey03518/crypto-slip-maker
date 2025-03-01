@@ -37,7 +37,7 @@ async function main(): Promise<void> {
     });
 
     const marketDepth = await maxApiProxy.fetchMarketDepth(TRADING_CURRENCY);
-    const lowestSellPrice = Math.min(...marketDepth.asks.map((ask: [string, string]) => parseFloat(ask[0])));
+    const lowestSellPrice = marketDepth.getLowestAskPrice();
     logger.info(`Lowest Sell Price: ${lowestSellPrice} ${QUOTE_CURRENCY.toUpperCase()}`);
 
     const walletBalance = await maxApiProxy.fetchWalletBalance(TRADING_CURRENCY);
@@ -74,7 +74,10 @@ async function main(): Promise<void> {
 
         if (parseFloat(balanceDiff) > 0) {
             const latestPrice = await maxApiProxy.fetchMarketDepth(TRADING_CURRENCY);
-            let currentHighestBuy = Math.max(...latestPrice.bids.map((bid: [string, string]) => parseFloat(bid[0])));
+            const currentHighestBuy = latestPrice.getHighestBidPrice();
+            if (currentHighestBuy === null) {
+                throw new Error('No bid prices available in the market');
+            }
             logger.info(`Highest Buy Price: ${currentHighestBuy} ${QUOTE_CURRENCY.toUpperCase()}`);
 
             const sellOrderResult = await maxApiProxy.placeOrder({

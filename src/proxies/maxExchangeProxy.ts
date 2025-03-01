@@ -5,6 +5,7 @@ import { OrderRequest, TradingCurrency } from '../types.js';
 import { MaxApiConfig, MaxMarketDepthResponse } from './maxTypes.js';
 import { logger } from '../utils/logger.js';
 import { setupMaxApiInterceptors } from './maxApiInterceptor.js';
+import { MarketDepthResponse, PriceLevel } from '../types/marketDepth.js';
 
 interface MaxOrderRequest {
     market: string;
@@ -97,7 +98,7 @@ export class MaxApi {
         };
     }
 
-    async fetchMarketDepth(currency: TradingCurrency): Promise<MaxMarketDepthResponse> {
+    async fetchMarketDepth(currency: TradingCurrency): Promise<MarketDepthResponse> {
         try {
             const market = this.getMarketPair(currency);
             
@@ -111,7 +112,18 @@ export class MaxApi {
                 }
             );
             
-            return response.data;
+            // Convert string arrays from MaxMarketDepthResponse to PriceLevel objects
+            const asks: PriceLevel[] = response.data.asks.map(([price, amount]) => ({
+                price: parseFloat(price),
+                amount: parseFloat(amount)
+            }));
+            
+            const bids: PriceLevel[] = response.data.bids.map(([price, amount]) => ({
+                price: parseFloat(price),
+                amount: parseFloat(amount)
+            }));
+
+            return new MarketDepthResponse(asks, bids);
         } catch (error) {
             this.handleApiError('Error fetching price', error);
             throw error;
