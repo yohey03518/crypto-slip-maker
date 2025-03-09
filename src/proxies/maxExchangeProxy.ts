@@ -3,7 +3,6 @@ import { createHmac } from 'crypto';
 import * as qs from 'qs';
 import { OrderRequest, TradingCurrency } from '../types.js';
 import { 
-    MaxApiConfig, 
     MaxMarketDepthResponse,
     MaxOrderRequest,
     MaxOrderDetail,
@@ -14,14 +13,16 @@ import { setupMaxApiInterceptors } from './maxApiInterceptor.js';
 import { MarketDepthResponse, PriceLevel } from '../types/marketDepth.js';
 import { Order, Status } from '../types/order.js';
 import { ExchangeApi } from '../types/exchange.js';
+import { Service } from 'typedi';
+import { MaxApiConfig } from '../config/MaxApiConfig.js';
 
+@Service()
 export class MaxApi implements ExchangeApi {
-    private readonly config: MaxApiConfig;
     private readonly axiosInstance;
     private readonly quoteCurrency: string;
 
-    constructor(config: MaxApiConfig) {
-        this.config = config;
+    constructor(private readonly config: MaxApiConfig) {
+        
         this.axiosInstance = axios.create({
             baseURL: this.config.apiBaseUrl
         });

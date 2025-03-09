@@ -59,10 +59,3 @@ export interface MaxUserInfoResponse {
     current_vip_level: VipLevel;
     next_vip_level: VipLevel;
 }
-
-export interface MaxApiConfig {
-    apiBaseUrl: string;
-    accessKey: string;
-    secretKey: string;
-    quoteCurrency: string;
-}
