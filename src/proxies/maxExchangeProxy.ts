@@ -9,7 +9,7 @@ import {
     MaxWalletBalanceItem
 } from './maxTypes.js';
 import { logger } from '../utils/logger.js';
-import { setupMaxApiInterceptors } from './maxApiInterceptor.js';
+import { setupApiInterceptors } from './apiInterceptor.js';
 import { MarketDepthResponse, PriceLevel } from '../types/marketDepth.js';
 import { Order, Status } from '../types/order.js';
 import { ExchangeApi } from '../types/exchange.js';
@@ -22,11 +22,10 @@ export class MaxApi implements ExchangeApi {
     private readonly quoteCurrency: string;
 
     constructor(private readonly config: MaxApiConfig) {
-        
         this.axiosInstance = axios.create({
             baseURL: this.config.apiBaseUrl
         });
-        setupMaxApiInterceptors(this.axiosInstance);
+        setupApiInterceptors(this.axiosInstance, 'MAX');
         this.quoteCurrency = config.quoteCurrency.toLowerCase();
     }
 
