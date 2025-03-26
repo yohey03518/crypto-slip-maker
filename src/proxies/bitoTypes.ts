@@ -1,7 +1,13 @@
+export interface BitoPriceLevel {
+    amount: string;
+    count: number;
+    price: string;
+    total: string;
+}
+
 export interface BitoMarketDepthResponse {
-    timestamp: number;
-    asks: [string, string][]; // [price, amount][]
-    bids: [string, string][]; // [price, amount][]
+    asks: BitoPriceLevel[];
+    bids: BitoPriceLevel[];
 }
 
 export interface BitoOrderRequest {
@@ -28,8 +34,13 @@ export interface BitoOrderDetail {
 }
 
 export interface BitoWalletBalanceItem {
-    currency: string;
-    balance: string;
-    locked: string;
+    amount: string;
     available: string;
+    currency: string;
+    stake: string;
+    tradable: boolean;
+}
+
+export interface BitoWalletBalanceResponse {
+    data: BitoWalletBalanceItem[];
 } 

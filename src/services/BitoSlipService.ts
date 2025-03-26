@@ -34,6 +34,13 @@ export class BitoSlipService {
     }
 
     public async Do(): Promise<void> {
-        // Implementation will be added later
+        const marketDepth = await this.bitoApi.fetchMarketDepth('usdt');
+        logger.info('Market depth:', marketDepth);
+        
+        const lowestAskPrice = Math.min(...marketDepth.asks.map(ask => ask.price));
+        logger.info('Lowest ask price:', lowestAskPrice);
+        
+        const balance = await this.bitoApi.fetchWalletBalance('usdt');
+        logger.info('USDT Balance:', balance);
     }
 } 

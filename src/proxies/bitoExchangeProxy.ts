@@ -6,7 +6,8 @@ import {
     BitoMarketDepthResponse,
     BitoOrderRequest,
     BitoOrderDetail,
-    BitoWalletBalanceItem
+    BitoWalletBalanceItem,
+    BitoWalletBalanceResponse
 } from './bitoTypes.js';
 import { logger } from '../utils/logger.js';
 import { setupApiInterceptors } from './apiInterceptor.js';
@@ -34,18 +35,67 @@ export class BitoApi implements ExchangeApi {
     }
 
     private generateAuthHeaders(payloadObj: Record<string, any>): Record<string, string> {
-        // TODO: Implement Bito-specific authentication
-        return {};
+        const payload = {
+            ...payloadObj,
+            nonce: Date.now()
+        };
+        
+        const payloadStr = Buffer.from(JSON.stringify(payload)).toString('base64');
+        const signature = createHmac('sha384', this.config.secretKey)
+            .update(payloadStr)
+            .digest('hex');
+
+        return {
+            'X-BITOPRO-APIKEY': this.config.accessKey,
+            'X-BITOPRO-PAYLOAD': payloadStr,
+            'X-BITOPRO-SIGNATURE': signature
+        };
     }
 
     async fetchMarketDepth(currency: TradingCurrency): Promise<MarketDepthResponse> {
-        // TODO: Implement Bito-specific market depth fetching
-        return new MarketDepthResponse([], []);
+        try {
+            const response = await this.axiosInstance.get<BitoMarketDepthResponse>(
+                `/order-book/${currency}_${this.quoteCurrency}?limit=5`
+            );
+            
+            // Convert response data to PriceLevel objects
+            const asks: PriceLevel[] = response.data.asks.map(level => ({
+                price: parseFloat(level.price),
+                amount: parseFloat(level.amount)
+            }));
+            
+            const bids: PriceLevel[] = response.data.bids.map(level => ({
+                price: parseFloat(level.price),
+                amount: parseFloat(level.amount)
+            }));
+
+            return new MarketDepthResponse(asks, bids);
+        } catch (error) {
+            this.handleApiError('Error fetching market depth', error);
+            throw error;
+        }
     }
 
     async fetchWalletBalance(currency: TradingCurrency): Promise<number> {
-        // TODO: Implement Bito-specific wallet balance fetching
-        return 0;
+        try {
+            const path = '/accounts/balance';
+            const payloadObj = {
+                path
+            };
+            
+            const response = await this.axiosInstance.get<BitoWalletBalanceResponse>(
+                path,
+                { 
+                    headers: this.generateAuthHeaders(payloadObj)
+                }
+            );
+            
+            const balance = response.data.data.find((b: BitoWalletBalanceItem) => b.currency.toLowerCase() === currency.toLowerCase())?.available || '0';
+            return parseFloat(balance);
+        } catch (error) {
+            this.handleApiError('Error fetching wallet balance', error);
+            throw error;
+        }
     }
 
     private mapOrderState(state: BitoOrderDetail['state']): Status {
