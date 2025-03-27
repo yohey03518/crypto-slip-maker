@@ -15,7 +15,7 @@ export class BitoSlipService {
         let orderDetail: Order;
         
         while (true) {
-            orderDetail = await this.bitoApi.getOrderDetail(parseInt(orderId));
+            orderDetail = await this.bitoApi.getOrderDetail(orderId);
             logger.info('Order status:', orderDetail.status);
             
             if (orderDetail.status === 'completed' || orderDetail.status === 'cancelled') {
@@ -40,19 +40,47 @@ export class BitoSlipService {
         const lowestAskPrice = Math.min(...marketDepth.asks.map(ask => ask.price));
         logger.info('Lowest ask price:', lowestAskPrice);
         
-        const balance = await this.bitoApi.fetchWalletBalance('usdt');
-        logger.info('USDT Balance:', balance);
+        const initBalance = await this.bitoApi.fetchWalletBalance('usdt');
+        logger.info('USDT Balance:', initBalance);
 
-        const feeRate = 0.0002;
+        const feeRate = 0.002;
         const buyAmount = 0.252 / lowestAskPrice / feeRate;
         const order = await this.bitoApi.placeOrder({
             currency: 'usdt',
             volume: Math.ceil(buyAmount * 10000) / 10000,
             side: 'buy',
-            // todo: use this price for real trading
-            // price: Math.ceil((lowestAskPrice + 0.002) * 10000) / 10000,
-            price: Math.ceil((lowestAskPrice - 0.2) * 10000) / 10000,
+            price: Math.ceil((lowestAskPrice + 0.002) * 10000) / 10000,
         });
         logger.info('Order:', order);
+
+        const orderDetail = await this.monitorOrder(order.id, Date.now());
+        logger.info('Order detail:', orderDetail);
+
+        if (orderDetail.status === 'completed') {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const updatedBalance = await this.bitoApi.fetchWalletBalance('usdt');
+            const balanceDiff = (Math.floor((updatedBalance - initBalance) * 10000) / 10000).toFixed(4);
+
+            if (parseFloat(balanceDiff) > 0) {
+                const latestMarketDepth = await this.bitoApi.fetchMarketDepth('usdt');
+                const highestBidPrice = Math.max(...latestMarketDepth.bids.map(bid => bid.price));
+                logger.info('Highest bid price:', highestBidPrice);
+
+                const sellOrder = await this.bitoApi.placeOrder({
+                    currency: 'usdt',
+                    volume: parseFloat(balanceDiff),
+                    side: 'sell',
+                    price: Math.floor(highestBidPrice * 10000) / 10000,
+                });
+                logger.info('Sell order:', sellOrder);
+
+                const sellOrderDetail = await this.monitorOrder(sellOrder.id, Date.now());
+                logger.info('Sell order detail:', sellOrderDetail);
+            } else {
+                logger.info('No USDT balance difference detected to sell');
+            }
+        }
+
+        logger.info('Task completed');
     }
 } 

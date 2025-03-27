@@ -15,7 +15,7 @@ export class MaxSlipService {
         let orderDetail: Order;
         
         while (true) {
-            orderDetail = await this.maxApi.getOrderDetail(parseInt(orderId));
+            orderDetail = await this.maxApi.getOrderDetail(orderId);
             logger.info('Order status:', orderDetail.status);
             
             if (orderDetail.status === 'completed' || orderDetail.status === 'cancelled') {

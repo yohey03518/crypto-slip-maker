@@ -7,7 +7,8 @@ import {
     BitoOrderRequest,
     BitoOrderDetail,
     BitoWalletBalanceItem,
-    BitoWalletBalanceResponse
+    BitoWalletBalanceResponse,
+    BitoOrderStatus
 } from './bitoTypes.js';
 import { logger } from '../utils/logger.js';
 import { setupApiInterceptors } from './apiInterceptor.js';
@@ -100,13 +101,13 @@ export class BitoApi implements ExchangeApi {
         }
     }
 
-    private mapOrderState(state: BitoOrderDetail['state']): Status {
+    private mapOrderState(state: BitoOrderStatus): Status {
         switch (state) {
-            case 'completed':
+            case BitoOrderStatus.Completed:
                 return 'completed';
-            case 'cancelled':
+            case BitoOrderStatus.Cancelled:
                 return 'cancelled';
-            case 'pending':
+            case BitoOrderStatus.InProgress:
                 return 'pending';
             default:
                 return 'other';
@@ -116,7 +117,7 @@ export class BitoApi implements ExchangeApi {
     private convertToOrder(bitoOrder: BitoOrderDetail): Order {
         return {
             id: bitoOrder.id.toString(),
-            status: this.mapOrderState(bitoOrder.state)
+            status: this.mapOrderState(bitoOrder.status)
         };
     }
 
@@ -150,9 +151,25 @@ export class BitoApi implements ExchangeApi {
         }
     }
 
-    async getOrderDetail(orderId: number): Promise<Order> {
-        // TODO: Implement Bito-specific order detail fetching
-        throw new Error('Not implemented');
+    async getOrderDetail(orderId: string): Promise<Order> {
+        try {
+            const path = `/orders/usdt_twd/${orderId}`;
+            const payloadObj = {
+                path
+            };
+
+            const response = await this.axiosInstance.get<BitoOrderDetail>(
+                path,
+                {
+                    headers: this.generateAuthHeaders(payloadObj, 'GET')
+                }
+            );
+
+            return this.convertToOrder(response.data);
+        } catch (error) {
+            this.handleApiError('Error fetching order detail', error);
+            throw error;
+        }
     }
 
     private handleApiError(message: string, error: unknown): void {

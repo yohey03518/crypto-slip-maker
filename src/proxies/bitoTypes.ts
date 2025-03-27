@@ -19,18 +19,37 @@ export interface BitoOrderRequest {
 }
 
 export interface BitoOrderDetail {
-    id: number;
-    market: string;
-    side: 'buy' | 'sell';
-    state: 'pending' | 'completed' | 'cancelled';
-    type: string;
+    id: string;
+    pair: string;
     price: string;
-    avgPrice: string;
-    volume: string;
-    remainingVolume: string;
-    executedVolume: string;
-    createdAt: number;
-    updatedAt: number;
+    avgExecutionPrice: string;
+    action: 'BUY' | 'SELL';
+    type: 'LIMIT' | 'MARKET' | 'STOP_LIMIT';
+    timestamp: number;
+    status: BitoOrderStatus;
+    originalAmount: string;
+    remainingAmount: string;
+    executedAmount: string;
+    fee: string;
+    feeSymbol: string;
+    bitoFee: string;
+    total: string;
+    seq: string;
+    stopPrice?: string;
+    condition?: '>=' | '<=';
+    timeInForce: 'GTC' | 'POST_ONLY';
+    createdTimestamp: number;
+    updatedTimestamp: number;
+}
+
+export enum BitoOrderStatus {
+    NotTriggered = -1,
+    InProgress = 0,
+    PartialDeal = 1,
+    Completed = 2,
+    CompletedPartialDeal = 3,
+    Cancelled = 4,
+    PostOnlyCancelled = 6
 }
 
 export interface BitoWalletBalanceItem {

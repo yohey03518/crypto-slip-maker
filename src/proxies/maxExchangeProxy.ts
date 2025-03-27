@@ -164,13 +164,13 @@ export class MaxApi implements ExchangeApi {
         }
     }
 
-    async getOrderDetail(orderId: number): Promise<Order> {
+    async getOrderDetail(orderId: string): Promise<Order> {
         try {
             const path = '/api/v3/order';
             const payloadObj = {
                 nonce: Date.now(),
                 path,
-                id: orderId
+                id: parseInt(orderId)
             };
             
             const response = await this.axiosInstance.get<MaxOrderDetail>(

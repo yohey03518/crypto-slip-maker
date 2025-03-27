@@ -32,5 +32,5 @@ export interface ExchangeApi {
      * @param orderId The ID of the order to fetch details for
      * @returns Promise resolving to standardized order response
      */
-    getOrderDetail(orderId: number): Promise<Order>;
+    getOrderDetail(orderId: string): Promise<Order>;
 } 
