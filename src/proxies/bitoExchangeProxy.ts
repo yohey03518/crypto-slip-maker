@@ -34,10 +34,12 @@ export class BitoApi implements ExchangeApi {
         return `${baseCurrency.toLowerCase()}${this.quoteCurrency}`;
     }
 
-    private generateAuthHeaders(payloadObj: Record<string, any>): Record<string, string> {
-        const payload = {
+    private generateAuthHeaders(payloadObj: Record<string, any>, method: 'GET' | 'POST'): Record<string, string> {
+        const payload = method === 'GET' ? {
             ...payloadObj,
             nonce: Date.now()
+        } : {
+            ...payloadObj,
         };
         
         const payloadStr = Buffer.from(JSON.stringify(payload)).toString('base64');
@@ -86,7 +88,7 @@ export class BitoApi implements ExchangeApi {
             const response = await this.axiosInstance.get<BitoWalletBalanceResponse>(
                 path,
                 { 
-                    headers: this.generateAuthHeaders(payloadObj)
+                    headers: this.generateAuthHeaders(payloadObj, 'GET')
                 }
             );
             
@@ -119,8 +121,33 @@ export class BitoApi implements ExchangeApi {
     }
 
     async placeOrder(orderRequest: OrderRequest): Promise<Order> {
-        // TODO: Implement Bito-specific order placement
-        throw new Error('Not implemented');
+        try {
+            const path = `/orders/${orderRequest.currency}_${this.quoteCurrency}`;
+            const payloadObj = {
+                action: orderRequest.side.toUpperCase(),
+                amount: orderRequest.volume.toString(),
+                price: orderRequest.price.toString(),
+                type: 'LIMIT',
+                timestamp: Date.now(),
+                path
+            };
+
+            const response = await this.axiosInstance.post(
+                path,
+                payloadObj,
+                {
+                    headers: this.generateAuthHeaders(payloadObj, 'POST')
+                }
+            );
+
+            return {
+                id: response.data.orderId.toString(),
+                status: 'pending'
+            };
+        } catch (error) {
+            this.handleApiError('Error placing order', error);
+            throw error;
+        }
     }
 
     async getOrderDetail(orderId: number): Promise<Order> {

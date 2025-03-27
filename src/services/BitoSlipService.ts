@@ -42,5 +42,17 @@ export class BitoSlipService {
         
         const balance = await this.bitoApi.fetchWalletBalance('usdt');
         logger.info('USDT Balance:', balance);
+
+        const feeRate = 0.0002;
+        const buyAmount = 0.252 / lowestAskPrice / feeRate;
+        const order = await this.bitoApi.placeOrder({
+            currency: 'usdt',
+            volume: Math.ceil(buyAmount * 10000) / 10000,
+            side: 'buy',
+            // todo: use this price for real trading
+            // price: Math.ceil((lowestAskPrice + 0.002) * 10000) / 10000,
+            price: Math.ceil((lowestAskPrice - 0.2) * 10000) / 10000,
+        });
+        logger.info('Order:', order);
     }
 } 
