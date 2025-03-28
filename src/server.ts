@@ -10,11 +10,16 @@ config();
 
 async function main(): Promise<void> {
   try {
-    // const maxSlipService = Container.get(MaxSlipService);
-    // await maxSlipService.Do();
-
+    const maxSlipService = Container.get(MaxSlipService);
     const bitoSlipService = Container.get(BitoSlipService);
-    await bitoSlipService.Do();
+
+    [maxSlipService, bitoSlipService].forEach(async (service) => {
+      try {
+        await service.Do();
+      } catch (error) {
+        logger.error('Service failed:', error instanceof Error ? error.message : 'Unknown error', typeof service);
+      }
+    });
   } catch (error) {
     console.error(error);
     logger.error('Script failed:', error instanceof Error ? error.message : 'Unknown error');

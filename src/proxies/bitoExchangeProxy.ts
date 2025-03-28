@@ -21,18 +21,12 @@ import { BitoApiConfig } from '../config/BitoApiConfig.js';
 @Service()
 export class BitoApi implements ExchangeApi {
     private readonly axiosInstance;
-    private readonly quoteCurrency: string;
 
     constructor(private readonly config: BitoApiConfig) {
         this.axiosInstance = axios.create({
             baseURL: this.config.apiBaseUrl
         });
         setupApiInterceptors(this.axiosInstance, 'BITO');
-        this.quoteCurrency = config.quoteCurrency.toLowerCase();
-    }
-
-    private getMarketPair(baseCurrency: TradingCurrency): string {
-        return `${baseCurrency.toLowerCase()}${this.quoteCurrency}`;
     }
 
     private generateAuthHeaders(payloadObj: Record<string, any>, method: 'GET' | 'POST'): Record<string, string> {
@@ -58,7 +52,7 @@ export class BitoApi implements ExchangeApi {
     async fetchMarketDepth(currency: TradingCurrency): Promise<MarketDepthResponse> {
         try {
             const response = await this.axiosInstance.get<BitoMarketDepthResponse>(
-                `/order-book/${currency}_${this.quoteCurrency}?limit=5`
+                `/order-book/${currency}_twd?limit=5`
             );
             
             // Convert response data to PriceLevel objects
@@ -123,7 +117,7 @@ export class BitoApi implements ExchangeApi {
 
     async placeOrder(orderRequest: OrderRequest): Promise<Order> {
         try {
-            const path = `/orders/${orderRequest.currency}_${this.quoteCurrency}`;
+            const path = `/orders/${orderRequest.currency}_twd`;
             const payloadObj = {
                 action: orderRequest.side.toUpperCase(),
                 amount: orderRequest.volume.toString(),
