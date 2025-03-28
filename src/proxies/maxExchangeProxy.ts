@@ -19,16 +19,18 @@ import { MaxApiConfig } from '../config/MaxApiConfig.js';
 @Service()
 export class MaxApi implements ExchangeApi {
     private readonly axiosInstance;
+    private readonly quoteCurrency: string;
 
     constructor(private readonly config: MaxApiConfig) {
         this.axiosInstance = axios.create({
             baseURL: this.config.apiBaseUrl
         });
         setupApiInterceptors(this.axiosInstance, 'MAX');
+        this.quoteCurrency = process.env.QUOTE_CURRENCY!;
     }
 
     private getMarketPair(baseCurrency: TradingCurrency): string {
-        return `${baseCurrency.toLowerCase()}twd`;
+        return `${baseCurrency.toLowerCase()}${this.quoteCurrency.toLowerCase()}`;
     }
 
     private generateAuthHeaders(payloadObj: Record<string, any>): Record<string, string> {
@@ -162,7 +164,7 @@ export class MaxApi implements ExchangeApi {
         }
     }
 
-    async getOrderDetail(orderId: string): Promise<Order> {
+    async getOrderDetail(orderId: string, currency: TradingCurrency): Promise<Order> {
         try {
             const path = '/api/v3/order';
             const payloadObj = {

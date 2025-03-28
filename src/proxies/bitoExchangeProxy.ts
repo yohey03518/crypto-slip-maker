@@ -21,12 +21,14 @@ import { BitoApiConfig } from '../config/BitoApiConfig.js';
 @Service()
 export class BitoApi implements ExchangeApi {
     private readonly axiosInstance;
+    private readonly quoteCurrency: string;
 
     constructor(private readonly config: BitoApiConfig) {
         this.axiosInstance = axios.create({
             baseURL: this.config.apiBaseUrl
         });
         setupApiInterceptors(this.axiosInstance, 'BITO');
+        this.quoteCurrency = process.env.QUOTE_CURRENCY!;
     }
 
     private generateAuthHeaders(payloadObj: Record<string, any>, method: 'GET' | 'POST'): Record<string, string> {
@@ -52,7 +54,7 @@ export class BitoApi implements ExchangeApi {
     async fetchMarketDepth(currency: TradingCurrency): Promise<MarketDepthResponse> {
         try {
             const response = await this.axiosInstance.get<BitoMarketDepthResponse>(
-                `/order-book/${currency}_twd?limit=5`
+                `/order-book/${currency}_${this.quoteCurrency}?limit=5`
             );
             
             // Convert response data to PriceLevel objects
@@ -117,7 +119,7 @@ export class BitoApi implements ExchangeApi {
 
     async placeOrder(orderRequest: OrderRequest): Promise<Order> {
         try {
-            const path = `/orders/${orderRequest.currency}_twd`;
+            const path = `/orders/${orderRequest.currency}_${this.quoteCurrency.toLowerCase()}`;
             const payloadObj = {
                 action: orderRequest.side.toUpperCase(),
                 amount: orderRequest.volume.toString(),
@@ -145,9 +147,9 @@ export class BitoApi implements ExchangeApi {
         }
     }
 
-    async getOrderDetail(orderId: string): Promise<Order> {
+    async getOrderDetail(orderId: string, currency: TradingCurrency): Promise<Order> {
         try {
-            const path = `/orders/usdt_twd/${orderId}`;
+            const path = `/orders/${currency.toLowerCase()}_${this.quoteCurrency.toLowerCase()}/${orderId}`;
             const payloadObj = {
                 path
             };

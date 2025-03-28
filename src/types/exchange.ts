@@ -30,7 +30,8 @@ export interface ExchangeApi {
     /**
      * Fetches the details of a specific order
      * @param orderId The ID of the order to fetch details for
+     * @param currency The currency of the order
      * @returns Promise resolving to standardized order response
      */
-    getOrderDetail(orderId: string): Promise<Order>;
+    getOrderDetail(orderId: string, currency: TradingCurrency): Promise<Order>;
 } 

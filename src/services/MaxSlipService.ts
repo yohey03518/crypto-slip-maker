@@ -2,10 +2,11 @@ import { Service } from 'typedi';
 import { MaxApi } from '../proxies/maxExchangeProxy.js';
 import { logger } from '../utils/logger.js';
 import { Order } from '../types/order.js';
-
+import { TradingCurrency } from '../types.js';
 @Service()
 export class MaxSlipService {
     private readonly orderMonitoringTimeoutMs = 60000;
+    private readonly tradingCurrency: TradingCurrency = 'usdt';
 
     constructor(
         private readonly maxApi: MaxApi
@@ -15,7 +16,7 @@ export class MaxSlipService {
         let orderDetail: Order;
         
         while (true) {
-            orderDetail = await this.maxApi.getOrderDetail(orderId);
+            orderDetail = await this.maxApi.getOrderDetail(orderId, this.tradingCurrency);
             logger.info('Order status:', orderDetail.status);
             
             if (orderDetail.status === 'completed' || orderDetail.status === 'cancelled') {
@@ -35,16 +36,16 @@ export class MaxSlipService {
 
     public async Do(): Promise<void> {
         try {
-            const tradingCurrency = 'usdt';
-            const marketDepth = await this.maxApi.fetchMarketDepth(tradingCurrency);
+            const marketDepth = await this.maxApi.fetchMarketDepth(this.tradingCurrency);
             const lowestSellPrice = marketDepth.getLowestAskPrice();
             logger.info(`Lowest Sell Price: ${lowestSellPrice}`);
 
-            const walletBalance = await this.maxApi.fetchWalletBalance(tradingCurrency);
+            const walletBalance = await this.maxApi.fetchWalletBalance(this.tradingCurrency);
             const orderResult = await this.maxApi.placeOrder({
-                currency: tradingCurrency,
+                currency: this.tradingCurrency,
                 side: 'buy',
-                volume: 8.02, // Minimum trading amount for USDT
+                // Minimum trading amount for USDT is 8
+                volume: this.tradingCurrency === 'usdt' ?  8.02 : 0,
                 price: lowestSellPrice,
             });
 
@@ -52,11 +53,11 @@ export class MaxSlipService {
 
             if (orderDetail.status === 'completed') {
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                const updatedWalletBalance = await this.maxApi.fetchWalletBalance(tradingCurrency);
+                const updatedWalletBalance = await this.maxApi.fetchWalletBalance(this.tradingCurrency);
                 const balanceDiff = (Math.floor((updatedWalletBalance - walletBalance) * 10000) / 10000).toFixed(4);
 
                 if (parseFloat(balanceDiff) > 0) {
-                    const latestPrice = await this.maxApi.fetchMarketDepth(tradingCurrency);
+                    const latestPrice = await this.maxApi.fetchMarketDepth(this.tradingCurrency);
                     const currentHighestBuy = latestPrice.getHighestBidPrice();
                     if (currentHighestBuy === null) {
                         throw new Error('No bid prices available in the market');
@@ -64,7 +65,7 @@ export class MaxSlipService {
                     logger.info(`Highest Buy Price: ${currentHighestBuy}`);
 
                     const sellOrderResult = await this.maxApi.placeOrder({
-                        currency: tradingCurrency,
+                        currency: this.tradingCurrency,
                         side: 'sell',
                         volume: parseFloat(balanceDiff),
                         price: currentHighestBuy,
@@ -73,7 +74,7 @@ export class MaxSlipService {
                     const sellOrderDetail = await this.monitorOrder(sellOrderResult.id, Date.now());
                     logger.info('Final sell order details:', JSON.stringify(sellOrderDetail, null, 2));
                 } else {
-                    logger.info(`No ${tradingCurrency.toUpperCase()} balance difference detected to sell`);
+                    logger.info(`No ${this.tradingCurrency.toUpperCase()} balance difference detected to sell`);
                 }
             }
 
