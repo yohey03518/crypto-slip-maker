@@ -10,16 +10,28 @@ config();
 
 async function main(): Promise<void> {
   try {
-    const maxSlipService = Container.get(MaxSlipService);
-    const bitoSlipService = Container.get(BitoSlipService);
+    const services = [];
 
-    [maxSlipService, bitoSlipService].forEach(async (service) => {
+    if (process.env.RUN_MAX === 'true') {
+      services.push(Container.get(MaxSlipService));
+    }
+
+    if (process.env.RUN_BITO === 'true') {
+      services.push(Container.get(BitoSlipService));
+    }
+
+    if (services.length === 0) {
+      logger.info('No services enabled. Please check RUN_MAX and RUN_BITO environment variables.');
+      return;
+    }
+
+    for (const service of services) {
       try {
         await service.Do();
       } catch (error) {
         logger.error('Service failed:', error instanceof Error ? error.message : 'Unknown error', typeof service);
       }
-    });
+    }
   } catch (error) {
     console.error(error);
     logger.error('Script failed:', error instanceof Error ? error.message : 'Unknown error');
