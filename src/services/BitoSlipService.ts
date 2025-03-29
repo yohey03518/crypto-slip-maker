@@ -45,12 +45,13 @@ export class BitoSlipService {
         logger.info(`${this.tradingCurrency.toUpperCase()} Balance:`, initBalance);
 
         const feeRate = 0.002;
-        const buyAmount = 0.252 / lowestAskPrice / feeRate;
+        const expectedBuyFee = 0.2501;
+        const buyAmount = expectedBuyFee / lowestAskPrice / feeRate;
         const order = await this.bitoApi.placeOrder({
             currency: this.tradingCurrency,
             volume: Math.ceil(buyAmount * 10000) / 10000,
             side: 'buy',
-            price: Math.ceil((lowestAskPrice + 0.002) * 10000) / 10000,
+            price: Math.ceil((lowestAskPrice + 0.002) * 1000) / 1000,
         });
         logger.info('Order:', order);
 
@@ -71,7 +72,7 @@ export class BitoSlipService {
                     currency: this.tradingCurrency,
                     volume: parseFloat(balanceDiff),
                     side: 'sell',
-                    price: Math.floor(highestBidPrice * 10000) / 10000,
+                    price: Math.floor(highestBidPrice * 1000) / 1000,
                 });
                 logger.info('Sell order:', sellOrder);
 
