@@ -45,7 +45,7 @@ export class BitoSlipService {
         logger.info(`${this.tradingCurrency.toUpperCase()} Balance:`, initBalance);
 
         const feeRate = 0.002;
-        const expectedBuyFee = 0.2501;
+        const expectedBuyFee = 0.251;
         const buyAmount = expectedBuyFee / lowestAskPrice / feeRate;
         const order = await this.bitoApi.placeOrder({
             currency: this.tradingCurrency,
