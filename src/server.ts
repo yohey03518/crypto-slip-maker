@@ -11,20 +11,22 @@ config();
 
 async function main(): Promise<void> {
   try {
-    // Send 10 POST requests with timestamps
-    for (let i = 0; i < 10; i++) {
+    // Send single POST request with timestamp
+    const webhookUrl = process.env.WEBHOOK_URL;
+    if (!webhookUrl) {
+      logger.info('WEBHOOK_URL environment variable is not set, skipping webhook notification');
+    } else {
+      const timestamp = new Date().toISOString();
+      logger.info(`Generating timestamp: ${timestamp}`);
+      
       try {
-        const timestamp = new Date().toISOString();
-        logger.info(`Request ${i + 1}/10 - Generated timestamp: ${timestamp}`);
-        
-        await axios.post('https://webhook.site/6673f6db-ac9c-4bfd-a841-4426d5c450ca', {
-          request_number: i + 1,
+        await axios.post(webhookUrl, {
           timestamp: timestamp
         });
-        logger.info(`Request ${i + 1}/10 - Successfully sent timestamp to webhook`);
-        await new Promise(resolve => setTimeout(resolve, 50)); // Wait 50ms before next iteration
+        logger.info('Successfully sent timestamp to webhook');
       } catch (error) {
-        logger.error(`Request ${i + 1}/10 failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        logger.error(`Webhook request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        // Continue execution despite webhook error
       }
     }
 
