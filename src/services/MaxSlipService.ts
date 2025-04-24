@@ -52,7 +52,7 @@ export class MaxSlipService {
             const orderDetail = await this.monitorOrder(orderResult.id, Date.now());
 
             if (orderDetail.status === 'completed') {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 3000));
                 const updatedWalletBalance = await this.maxApi.fetchWalletBalance(this.tradingCurrency);
                 const balanceDiff = (Math.floor((updatedWalletBalance - walletBalance) * 10000) / 10000).toFixed(4);
 
