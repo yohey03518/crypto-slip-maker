@@ -124,7 +124,7 @@ export class BitoApi implements ExchangeApi {
                 action: orderRequest.side.toUpperCase(),
                 amount: orderRequest.volume.toString(),
                 price: orderRequest.price.toString(),
-                type: 'LIMIT',
+                type: 'MARKET',
                 timestamp: Date.now(),
                 path
             };
