@@ -123,7 +123,7 @@ export class BitoApi implements ExchangeApi {
             const payloadObj = {
                 action: orderRequest.side.toUpperCase(),
                 amount: orderRequest.volume.toString(),
-                price: orderRequest.price.toString(),
+                price: (orderRequest.price*orderRequest.volume).toString(),
                 type: 'MARKET',
                 timestamp: Date.now(),
                 path
