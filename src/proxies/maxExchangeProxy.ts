@@ -135,8 +135,8 @@ export class MaxApi implements ExchangeApi {
                 market: this.getMarketPair(orderRequest.currency),
                 side: orderRequest.side,
                 volume: orderRequest.volume.toString(),
-                price: orderRequest.price.toString(),
-                ord_type: 'limit' as const
+                // price: orderRequest.price.toString(),
+                ord_type: 'market' as const
             };
 
             const path = '/api/v3/wallet/spot/order';
