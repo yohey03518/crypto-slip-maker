@@ -11,25 +11,6 @@ config();
 
 async function main(): Promise<void> {
   try {
-    // Send single POST request with timestamp
-    const webhookUrl = process.env.WEBHOOK_URL;
-    if (!webhookUrl) {
-      logger.info('WEBHOOK_URL environment variable is not set, skipping webhook notification');
-    } else {
-      const timestamp = new Date().toISOString();
-      logger.info(`Generating timestamp: ${timestamp}`);
-      
-      try {
-        await axios.post(webhookUrl, {
-          timestamp: timestamp
-        });
-        logger.info('Successfully sent timestamp to webhook');
-      } catch (error) {
-        logger.error(`Webhook request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        // Continue execution despite webhook error
-      }
-    }
-
     const services = [];
 
     if (process.env.RUN_MAX === 'true') {
