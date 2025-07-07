@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import { logger } from './utils/logger.js';
 import { MaxSlipService } from './services/MaxSlipService.js';
 import { BitoSlipService } from './services/BitoSlipService.js';
+import { HoyaSlipService } from './services/HoyaSlipService.js';
 import axios from 'axios';
 
 // Load environment variables
@@ -21,8 +22,12 @@ async function main(): Promise<void> {
       services.push(Container.get(BitoSlipService));
     }
 
+    if (process.env.RUN_HOYA === 'true') {
+      services.push(Container.get(HoyaSlipService));
+    }
+
     if (services.length === 0) {
-      logger.info('No services enabled. Please check RUN_MAX and RUN_BITO environment variables.');
+      logger.info('No services enabled. Please check RUN_MAX, RUN_BITO, and RUN_HOYA environment variables.');
       return;
     }
 

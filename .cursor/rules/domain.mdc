@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Domain knowledge
+
+
+The application is to execute one trade in each integrated crypto exchange in order to spend trading fee and get the slip.
