@@ -22,6 +22,31 @@ export class HoyaSlipService {
         }
     }
 
+    private async captureScreenshot(errorContext: string): Promise<void> {
+        if (!this.page) return;
+        
+        try {
+            // Capture screenshot as base64
+            const screenshot = await this.page.screenshot({ 
+                type: 'png',
+                fullPage: true
+            }).then(buffer => buffer.toString('base64'));
+            
+            logger.error(`Screenshot for ${errorContext}:
+=== BEGIN SCREENSHOT ===
+data:image/png;base64,${screenshot}
+=== END SCREENSHOT ===`);
+        } catch (screenshotError) {
+            logger.error('Failed to capture error screenshot:', screenshotError instanceof Error ? screenshotError.message : 'Unknown error');
+        }
+    }
+
+    private async handleError(error: unknown, context: string): Promise<never> {
+        await this.captureScreenshot(context);
+        logger.error(`${context}:`, error instanceof Error ? error.message : 'Unknown error');
+        throw error;
+    }
+
     private async initBrowser(): Promise<void> {
         try {
             this.browser = await chromium.launch({
@@ -30,8 +55,7 @@ export class HoyaSlipService {
             this.page = await this.browser.newPage();
             logger.info('Browser initialized successfully');
         } catch (error) {
-            logger.error('Failed to initialize browser:', error instanceof Error ? error.message : 'Unknown error');
-            throw error;
+            await this.handleError(error, 'Failed to initialize browser');
         }
     }
 
@@ -55,7 +79,6 @@ export class HoyaSlipService {
         logger.info('HoyaSlipService: Starting task');
         
         try {
-            
             await this.initBrowser();
             if (!this.page) throw new Error('Browser page not initialized');
 
@@ -102,8 +125,7 @@ export class HoyaSlipService {
             await this.page.waitForTimeout(3000);
 
         } catch (error) {
-            logger.error('HoyaSlipService failed:', error instanceof Error ? error.message : 'Unknown error');
-            throw error;
+            await this.handleError(error, 'HoyaSlipService execution failed');
         } finally {
             await this.cleanup();
         }
