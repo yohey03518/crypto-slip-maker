@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY pnpm-lock.yaml ./
-RUN npm i -g pnpm && pnpm i
+RUN npm i -g pnpm && pnpm i && pnpm exec playwright install
 
 COPY . .
 
