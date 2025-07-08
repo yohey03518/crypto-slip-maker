@@ -1,10 +1,10 @@
-FROM node:20-slim
+FROM mcr.microsoft.com/playwright:v1.53.0-noble
 
 WORKDIR /app
 
 COPY package*.json ./
 COPY pnpm-lock.yaml ./
-RUN npm i -g pnpm && pnpm i && pnpm exec playwright install
+RUN npm i -g pnpm && pnpm i
 
 COPY . .
 
