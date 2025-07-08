@@ -50,7 +50,7 @@ data:image/png;base64,${screenshot}
     private async initBrowser(): Promise<void> {
         try {
             this.browser = await chromium.launch({
-                headless: false
+                headless: true // set to false for local debugging to open browser
             });
             this.page = await this.browser.newPage();
             logger.info('Browser initialized successfully');
