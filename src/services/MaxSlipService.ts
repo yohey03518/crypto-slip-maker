@@ -44,8 +44,8 @@ export class MaxSlipService {
             const orderResult = await this.maxApi.placeOrder({
                 currency: this.tradingCurrency,
                 side: 'buy',
-                // Minimum trading amount for TWD is 250
-                volume: this.tradingCurrency === 'usdt' ? Number((252/lowestSellPrice).toFixed(2)) : 0,
+                // Minimum trading amount for USDT is 8
+                volume: 8.1,
                 price: lowestSellPrice,
             });
 
