@@ -97,7 +97,11 @@ export class BitoApi implements ExchangeApi {
         }
     }
 
-    private mapOrderState(state: BitoOrderStatus): Status {
+    private mapOrderState(orderDetail: BitoOrderDetail): Status {
+        let state: BitoOrderStatus = orderDetail.status;
+        if (state === BitoOrderStatus.CompletedPartialDeal && parseFloat(orderDetail.remainingAmount) < 0.001) {
+            state = BitoOrderStatus.Completed;
+        }
         switch (state) {
             case BitoOrderStatus.Completed:
                 return 'completed';
@@ -113,7 +117,7 @@ export class BitoApi implements ExchangeApi {
     private convertToOrder(bitoOrder: BitoOrderDetail): Order {
         return {
             id: bitoOrder.id.toString(),
-            status: this.mapOrderState(bitoOrder.status)
+            status: this.mapOrderState(bitoOrder)
         };
     }
 
