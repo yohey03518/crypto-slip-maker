@@ -45,7 +45,8 @@ export class MaxSlipService {
                 currency: this.tradingCurrency,
                 side: 'buy',
                 // Minimum trading amount for USDT is 8
-                volume: 8.1,
+                // But also need to fit the minumum TWD amount 250
+                volume: Math.max(8.0, 250 / lowestSellPrice) + 0.1,
                 price: lowestSellPrice,
             });
 
