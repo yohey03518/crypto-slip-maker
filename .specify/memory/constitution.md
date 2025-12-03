@@ -1,50 +1,234 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+==================
+Version Change: INITIAL → 1.0.0
+
+Constitution Type: Initial ratification for brownfield project
+
+Principles Defined:
+- I. Test-Driven Development (TDD) - Mandatory testing discipline
+- II. Code Quality & Design Principles - SOLID, KISS, maintainability, async/await
+- III. Brownfield Safety Protocol - Protection of existing code
+- IV. Observability & Tracing - Debugging, monitoring, crypto-safe retry logic
+
+Sections Added:
+- Core Principles (4 principles)
+- Quality Gates (Test, Code Quality, Observability)
+- Development Workflow (with commit message traceability)
+- Governance
+
+Templates Status:
+✅ plan-template.md - Constitution Check section aligns with all 4 principles
+✅ spec-template.md - User scenarios and requirements align with TDD approach
+✅ tasks-template.md - Test-first task organization supports TDD mandate
+✅ agent-file-template.md - Reviewed for alignment
+✅ checklist-template.md - Reviewed for alignment
+
+Follow-up TODOs:
+- None: All placeholders filled, all templates aligned
+-->
+
+# Crypto-Slip-Maker Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Test-Driven Development (TDD) - NON-NEGOTIABLE
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+**All new code and modifications MUST follow Test-Driven Development:**
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+- Tests MUST be written BEFORE implementation code
+- Tests MUST fail initially (Red phase)
+- Implementation MUST make tests pass (Green phase)
+- Code MUST be refactored after passing (Refactor phase)
+- All unit test cases MUST be explicitly listed in task specifications (`tasks.md`) to ensure consistency and repeatability
+- Test coverage MUST include: unit tests (isolated components), integration tests (component interactions), contract tests (API boundaries)
+- Edge cases and error scenarios MUST have corresponding test cases
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+**Rationale**: TDD ensures specification clarity before implementation, provides living documentation, enables confident refactoring, and prevents regression. Explicit test case listing in tasks ensures AI agents can regenerate code consistently.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### II. Code Quality & Design Principles
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**All code MUST adhere to industry-standard design principles:**
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- **SOLID Principles MUST be followed:**
+  - Single Responsibility: Each class/module has one reason to change
+  - Open/Closed: Open for extension, closed for modification
+  - Liskov Substitution: Subtypes must be substitutable for base types
+  - Interface Segregation: Clients should not depend on unused interfaces
+  - Dependency Inversion: Depend on abstractions, not concretions
+- **KISS (Keep It Simple, Stupid) MUST be applied:**
+  - Prefer simple solutions over complex ones
+  - Avoid premature optimization
+  - Code MUST be self-documenting with clear naming
+  - Comments MUST explain "why", not "what"
+- **Code MUST be maintainable:**
+  - Functions/methods SHOULD be < 50 lines
+  - Cyclomatic complexity SHOULD be < 10
+  - Meaningful variable and function names REQUIRED
+  - All comments MUST be in English
+- **Asynchronous Operations:**
+  - Async/await MUST be used for all I/O operations
+  - No blocking operations on main thread
+  - All external API calls MUST be non-blocking
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+**Rationale**: These principles ensure long-term maintainability, reduce cognitive load, facilitate team collaboration, minimize technical debt, and ensure responsive execution in this I/O-bound console application.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### III. Brownfield Safety Protocol - NON-NEGOTIABLE
+
+**Existing code MUST be protected from unintended changes:**
+
+- AI agents MUST NOT modify existing code without explicit human approval
+- All proposed changes to existing files MUST be presented for review before application
+- New features SHOULD be implemented in new files/modules when possible
+- Changes to existing code MUST include:
+  - Clear justification for the change
+  - Risk assessment
+  - Rollback plan
+  - Test coverage for affected functionality
+- Refactoring of existing code REQUIRES explicit permission and comprehensive test coverage
+
+**Rationale**: Protects production-critical existing functionality, prevents accidental breaking changes, ensures deliberate evolution of the brownfield codebase, and maintains system stability.
+
+### IV. Observability & Tracing - NON-NEGOTIABLE
+
+**All code MUST support debugging and monitoring:**
+
+- **Structured Logging REQUIRED:**
+  - Use the project logger utility (`src/utils/logger.js`)
+  - Log levels: error, warn, info, debug
+  - Include context: service name, operation, relevant IDs, timestamps
+  - NO sensitive data (API keys, passwords, tokens) in logs
+- **Tracing Requirements:**
+  - All service entry points MUST log start/completion
+  - External API calls MUST log: endpoint, duration, status
+  - Error scenarios MUST log: full error context, stack trace, recovery action
+  - Transaction IDs SHOULD be propagated through service calls
+- **Monitoring Hooks:**
+  - Key business metrics MUST be logged (trades executed, slips generated, failures)
+  - Health indicators SHOULD be logged (retry counts, timeout occurrences)
+- **Timeout Handling:**
+  - All external API calls MUST have explicit timeouts to prevent indefinite hangs
+  - Timeout values SHOULD be configurable
+  - Timeout events MUST be logged
+- **Error Recovery for Trading Operations:**
+  - **CRITICAL - Crypto-Specific Retry Logic:**
+    - Network failures MAY trigger retry logic ONLY if order execution is confirmed unsuccessful
+    - MUST verify order status before retry to prevent double orders
+    - MUST NOT retry if order status is unknown or confirmed successful
+    - Maximum retry attempts SHOULD be configurable (default: 3)
+    - Exponential backoff SHOULD be used between retries
+  - All retry attempts MUST be logged with reason and outcome
+  - Failed orders after all retries MUST be clearly logged for manual review
+
+**Rationale**: Enables rapid debugging in production, facilitates root cause analysis, prevents indefinite hangs in console application, and ensures safe error recovery for financial trading operations where duplicate orders can cause monetary loss.
+
+## Quality Gates
+
+**The following gates MUST pass before code is considered complete:**
+
+1. **Test Gate:**
+   - All tests pass (unit, integration, contract)
+   - Test coverage meets minimum thresholds (unit: 80%, integration: key flows covered)
+   - No skipped or disabled tests without documented justification
+
+2. **Code Quality Gate:**
+   - TypeScript compilation succeeds with no errors
+   - Linter passes with no errors (warnings acceptable with justification)
+   - Code review completed and approved
+
+3. **Observability Gate:**
+   - All service entry/exit points have logging
+   - Error scenarios have appropriate error logging
+   - No sensitive data in logs verified
+   - Timeout handling implemented for external calls
+
+## Development Workflow
+
+**Standard workflow for all code changes:**
+
+1. **Planning Phase:**
+   - Feature specification created (`spec.md`)
+   - Implementation plan drafted (`plan.md`)
+   - Tasks decomposed with explicit test cases listed (`tasks.md`)
+
+2. **Implementation Phase:**
+   - Create feature branch following pattern: `###-feature-name`
+   - For each task:
+     - Write tests FIRST (must fail)
+     - Implement code to pass tests
+     - Refactor while maintaining green tests
+     - Update logs/tracing as needed
+   - **Commit Message Requirements:**
+     - Commit after each logical task completion
+     - Each commit message MUST include:
+       - **Conventional Commits format**: `type(scope): subject`
+         - Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+       - **Subject line**: Brief description of what was done
+       - **Body**: Implementation details (bullet points or paragraphs)
+       - **Footer** (required): MUST include original user prompt/request for traceability
+       - **Footer format**: `User-Request: "original prompt text"`
+     - **Format Example:**
+       ```
+       feat(exchange): add retry logic for failed orders
+
+       - Implemented exponential backoff retry
+       - Added order status verification before retry
+       - Logged all retry attempts
+       
+       Closes #123
+       User-Request: "Add retry mechanism when exchange API fails"
+       ```
+
+3. **Review Phase:**
+   - Self-review against constitution principles
+   - Run all quality gates locally
+   - Request human review for:
+     - Changes to existing files (brownfield protocol)
+     - New external dependencies
+     - Security-sensitive code
+     - Trading/order execution logic
+
+4. **Integration Phase:**
+   - Merge only after approval and all gates pass
+   - Use semantic versioning for releases:
+     - MAJOR: Breaking changes (API changes, config changes)
+     - MINOR: New features, backward compatible
+     - PATCH: Bug fixes, documentation, refactoring
+   - Tag releases in Git following `vX.Y.Z` pattern
+
+**Rationale for Commit Traceability**: Including the original user prompt at the end of commit messages enables:
+- Future developers to understand the business context and intent
+- Tracing feature requests through to implementation
+- Better historical analysis of why decisions were made
+- Improved handoff documentation for brownfield maintenance
+- Clean separation between implementation details and original requirements
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+**This constitution supersedes all other practices and is enforced as follows:**
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+1. **Enforcement:**
+   - All pull requests MUST verify compliance with constitution principles
+   - AI agents MUST check against constitution before proposing changes
+   - Non-compliance MUST be justified or corrected before merge
+
+2. **Amendment Process:**
+   - Constitution changes require documentation of rationale
+   - Version MUST be bumped following semantic versioning:
+     - MAJOR: Removal/redefinition of existing principles
+     - MINOR: New principles or material expansions
+     - PATCH: Clarifications, wording improvements
+   - Amendment requires human approval
+   - Migration plan REQUIRED for breaking changes
+
+3. **Compliance Reviews:**
+   - Constitution compliance checked at each feature specification
+   - Code reviews verify adherence to all applicable principles
+   - Violations require documented justification and approval
+
+4. **Complexity Justification:**
+   - Any violation of simplicity (KISS) MUST be justified in implementation plan
+   - Trade-offs between principles MUST be explicitly documented
+   - Alternative simpler approaches MUST be considered and documented if rejected
+
+**Version**: 1.0.0 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-03
