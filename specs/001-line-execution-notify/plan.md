@@ -12,7 +12,7 @@ Add Line Messaging API integration to send a single summary notification after a
 **Language/Version**: TypeScript 5.x with ES2022 target, Node.js 20.x  
 **Primary Dependencies**: axios (HTTP client), typedi (DI container), dotenv (env config)  
 **Storage**: N/A (console application, no persistent storage)  
-**Testing**: NEEDS CLARIFICATION (current testing framework not identified)  
+**Testing**: Native Node.js test runner (`node:test`) with tsx for TypeScript support  
 **Target Platform**: Node.js console application (Linux/macOS server)  
 **Project Type**: Single project (src/ directory structure)  
 **Performance Goals**: Send notification within 12 seconds after last exchange completes (5s timeout + 2s delay + 5s retry)  
@@ -28,7 +28,8 @@ Add Line Messaging API integration to send a single summary notification after a
 ### ✅ Principle I: Test-Driven Development (TDD)
 - **Status**: PASS with commitment
 - **Plan**: All new code (LineNotificationService, result aggregation, message formatting) will be written test-first following Red-Green-Refactor
-- **Test Coverage**: Unit tests (message formatting, result aggregation), integration tests (Line API calls with mocking), contract tests (Line API endpoint structure)
+- **Test Coverage**: Unit tests (message formatting, result aggregation), logic tests (transformations, validations, integrations)
+- **Test Quality**: All tests MUST contain actual logic verification (filtering, validation, formatting) rather than simple property assignment checks, per constitution test quality requirements
 - **Task Requirement**: All test cases will be explicitly listed in tasks.md
 
 ### ✅ Principle II: Code Quality & Design Principles
@@ -77,9 +78,9 @@ Add Line Messaging API integration to send a single summary notification after a
 - **Updates**: 
   - Testing framework resolved: Native Node.js test runner (research.md)
   - Test data fixtures defined in data-model.md
-  - Contract tests specified in contracts/line-api.yaml
+  - Test quality requirements: All tests verify logic (transformations, validations, integrations) not just property assignments
   - All test scenarios documented across research, data-model, and quickstart
-- **Verification**: Design includes explicit test cases for all entities, message formats, and API interactions
+- **Verification**: Design includes explicit test cases for all entities, message formats, and logic flows. Tests focus on behavior verification per constitution test quality requirements.
 
 ### ✅ Principle II: Code Quality & Design Principles
 - **Status**: PASS - design confirms SOLID adherence

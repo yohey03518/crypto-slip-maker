@@ -1,33 +1,33 @@
 <!--
 Sync Impact Report
 ==================
-Version Change: 1.0.0 → 1.0.1
+Version Change: 1.0.1 → 1.0.2
 
-Constitution Type: Clarification update
+Constitution Type: PATCH - Clarification update
 
 Changes Made:
-- Added package manager specification (pnpm) to Development Workflow section
-- Clarified that pnpm is the standard package manager for this project
+- Added test quality clarification to Principle I (TDD)
+- Tests must contain logic, not just validate property assignments
+- Tests should verify behavior, transformations, validations, and business logic
 
 Principles Modified:
-- None (no principle changes)
+- Principle I: Test-Driven Development - Added test quality requirements
 
 Sections Modified:
-- Development Workflow: Added package manager specification
+- Principle I: Added "Test Quality Requirements" subsection
 
 Templates Status:
-✅ plan-template.md - No changes needed (no package manager references)
-✅ spec-template.md - No changes needed (no package manager references)
-✅ tasks-template.md - No changes needed (generic template)
+✅ plan-template.md - No changes needed (references constitution principles)
+✅ spec-template.md - No changes needed (references constitution principles)
+✅ tasks-template.md - No changes needed (references constitution principles)
 ✅ agent-file-template.md - No changes needed
 ✅ checklist-template.md - No changes needed
 
 Files Requiring Updates:
-✅ specs/001-line-execution-notify/tasks.md - Updated npm references to pnpm
-⚠️ .specify/scripts/bash/update-agent-context.sh - Contains npm reference (line 257) - may need update if used
+✅ All test files updated to follow new test quality standards
 
 Follow-up TODOs:
-- Review update-agent-context.sh script to determine if npm reference should be updated to pnpm
+- None
 -->
 
 # Crypto-Slip-Maker Constitution
@@ -46,7 +46,19 @@ Follow-up TODOs:
 - Test coverage MUST include: unit tests (isolated components), integration tests (component interactions), contract tests (API boundaries)
 - Edge cases and error scenarios MUST have corresponding test cases
 
-**Rationale**: TDD ensures specification clarity before implementation, provides living documentation, enables confident refactoring, and prevents regression. Explicit test case listing in tasks ensures AI agents can regenerate code consistently.
+**Test Quality Requirements:**
+
+- Tests MUST contain actual logic and behavior verification
+- Tests MUST NOT simply validate that properties were assigned (e.g., `assert.equal(obj.prop, value)` where `value` was just assigned)
+- Tests SHOULD verify:
+  - Transformations and computations (filtering, mapping, calculations)
+  - Validation logic (boundary conditions, format checking)
+  - Business rules and workflows
+  - Error handling and edge cases
+  - Integration between components
+- Test names MUST clearly describe the logic being tested (e.g., "should correctly filter results using predicate" not "should have correct value")
+
+**Rationale**: TDD ensures specification clarity before implementation, provides living documentation, enables confident refactoring, and prevents regression. Explicit test case listing in tasks ensures AI agents can regenerate code consistently. Quality tests verify behavior rather than implementation details, making tests resilient to refactoring.
 
 ### II. Code Quality & Design Principles
 
@@ -238,4 +250,4 @@ Follow-up TODOs:
    - Trade-offs between principles MUST be explicitly documented
    - Alternative simpler approaches MUST be considered and documented if rejected
 
-**Version**: 1.0.1 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-03
+**Version**: 1.0.2 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-03
