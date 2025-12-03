@@ -1,0 +1,270 @@
+openapi: 3.0.3
+info:
+  title: Line Messaging API - Push Message
+  description: |
+    Contract definition for Line Messaging API push message endpoint used by crypto-slip-maker
+    to send execution summary notifications.
+    
+    This contract is used for:
+    - Contract testing to verify request/response structure
+    - Documentation of expected API behavior
+    - Validation of integration implementation
+    
+    Reference: https://developers.line.biz/en/reference/messaging-api/#send-push-message
+  version: 1.0.0
+  contact:
+    name: Crypto Slip Maker - Line Notification Feature
+    url: https://developers.line.biz/en/reference/messaging-api/
+
+servers:
+  - url: https://api.line.me/v2/bot
+    description: Line Messaging API production endpoint
+
+paths:
+  /message/push:
+    post:
+      summary: Send push message
+      description: |
+        Sends a push message to a Line user. This endpoint is used to send the execution
+        summary notification after all exchanges complete their trade execution flows.
+        
+        Features:
+        - Single text message per notification
+        - Maximum 5000 characters per message (enforced client-side)
+        - 5-second timeout configured client-side
+        - Retry once after 2-second delay on failure
+      operationId: sendPushMessage
+      tags:
+        - Messaging
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushMessageRequest'
+            examples:
+              allSuccess:
+                summary: All exchanges successful
+                value:
+                  to: U1234567890abcdef1234567890abcdef
+                  messages:
+                    - type: text
+                      text: Max, Bito and Hoya Success
+              mixedResults:
+                summary: Mixed success and failure
+                value:
+                  to: U1234567890abcdef1234567890abcdef
+                  messages:
+                    - type: text
+                      text: Max and Bito Success, Hoya failed
+              allFailed:
+                summary: All exchanges failed
+                value:
+                  to: U1234567890abcdef1234567890abcdef
+                  messages:
+                    - type: text
+                      text: Max, Bito and Hoya failed
+              singleExchange:
+                summary: Single exchange enabled
+                value:
+                  to: U1234567890abcdef1234567890abcdef
+                  messages:
+                    - type: text
+                      text: Max Success
+      responses:
+        '200':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                {}
+        '400':
+          description: Bad request - Invalid request format or parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidUserId:
+                  summary: Invalid user ID format
+                  value:
+                    message: The request body has 1 error(s)
+                    details:
+                      - message: "May not be empty"
+                        property: messages[0].text
+                invalidMessageType:
+                  summary: Invalid message type
+                  value:
+                    message: Invalid message type
+        '401':
+          description: Unauthorized - Invalid or missing channel access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Authentication failed
+        '403':
+          description: Forbidden - User not found or cannot receive messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Forbidden
+        '429':
+          description: Too many requests - Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Too many requests
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Internal server error
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Line Messaging API channel access token.
+        Obtained from Line Developers Console for your Messaging API channel.
+        Set via LINE_CHANNEL_ACCESS_TOKEN environment variable.
+
+  schemas:
+    PushMessageRequest:
+      type: object
+      required:
+        - to
+        - messages
+      properties:
+        to:
+          type: string
+          description: |
+            Line user ID to send the message to.
+            Must be a valid Line user ID (typically starts with 'U').
+            Set via LINE_USER_ID environment variable.
+          pattern: '^U[0-9a-f]{32}$'
+          example: U1234567890abcdef1234567890abcdef
+        messages:
+          type: array
+          description: |
+            Array of message objects to send.
+            For this feature, always contains exactly one text message.
+          minItems: 1
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/TextMessage'
+
+    TextMessage:
+      type: object
+      required:
+        - type
+        - text
+      properties:
+        type:
+          type: string
+          enum:
+            - text
+          description: Message type - always 'text' for execution summary notifications
+        text:
+          type: string
+          description: |
+            Text content of the message.
+            Contains the formatted execution summary (e.g., "Max and Bito Success, Hoya failed").
+            Maximum length: 5000 characters (enforced client-side per FR-013).
+          minLength: 1
+          maxLength: 5000
+          example: Max and Bito Success, Hoya failed
+
+    SuccessResponse:
+      type: object
+      description: |
+        Empty JSON object returned on successful message send.
+        HTTP 200 status indicates success; response body contains no additional data.
+      example: {}
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
+          example: Authentication failed
+        details:
+          type: array
+          description: |
+            Optional array of detailed error information.
+            Present for validation errors (HTTP 400).
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+
+    ErrorDetail:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Detailed error message
+          example: May not be empty
+        property:
+          type: string
+          description: Property path that caused the error
+          example: messages[0].text
+
+  examples:
+    validRequest:
+      summary: Valid push message request
+      value:
+        to: U1234567890abcdef1234567890abcdef
+        messages:
+          - type: text
+            text: Max and Bito Success, Hoya failed
+
+# Contract Testing Scenarios
+# These scenarios should be covered in contract tests (tests/contract/lineApi.contract.test.ts):
+#
+# 1. Request Structure Validation:
+#    - Valid request with all required fields → 200 OK
+#    - Missing 'to' field → 400 Bad Request
+#    - Missing 'messages' field → 400 Bad Request
+#    - Empty 'messages' array → 400 Bad Request
+#    - Message missing 'type' field → 400 Bad Request
+#    - Message missing 'text' field → 400 Bad Request
+#
+# 2. Authentication:
+#    - Valid Bearer token → 200 OK
+#    - Missing Authorization header → 401 Unauthorized
+#    - Invalid Bearer token → 401 Unauthorized
+#
+# 3. Response Structure Validation:
+#    - Success response is empty object {}
+#    - Error responses contain 'message' field
+#    - 400 errors may contain 'details' array
+#
+# 4. Client-Side Requirements (tested in integration tests):
+#    - 5-second timeout enforced
+#    - Retry logic: initial attempt + 1 retry after 2-second delay
+#    - Message truncation/validation before 5000 character limit
+#    - Authorization header format: "Bearer {token}"
+#    - Content-Type header: "application/json"
+#
+# 5. Edge Cases:
+#    - Network timeout → Retry after 2 seconds
+#    - First attempt fails, second succeeds → Log both attempts
+#    - Both attempts fail → Log full request/response with auth headers
+#    - User ID not found → 403 Forbidden, log and continue
+
