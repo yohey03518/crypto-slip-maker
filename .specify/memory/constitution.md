@@ -1,30 +1,35 @@
 <!--
 Sync Impact Report
 ==================
-Version Change: 1.0.1 → 1.0.2
+Version Change: 1.0.2 → 1.1.0
 
-Constitution Type: PATCH - Clarification update
+Constitution Type: MINOR - New principle requirement added
 
 Changes Made:
-- Added test quality clarification to Principle I (TDD)
-- Tests must contain logic, not just validate property assignments
-- Tests should verify behavior, transformations, validations, and business logic
+- Added HTTP client logging requirement to Principle IV (Observability & Tracing)
+- All HTTP clients MUST use axios with interceptors for request/response logging
+- Authorization headers MUST be masked in logs
+- Standardized HTTP client implementation pattern across codebase
 
 Principles Modified:
-- Principle I: Test-Driven Development - Added test quality requirements
+- Principle IV: Observability & Tracing - Added "HTTP Client Logging Requirements" subsection
 
 Sections Modified:
-- Principle I: Added "Test Quality Requirements" subsection
+- Principle IV: Added mandatory axios interceptor usage for all HTTP clients
+- Principle IV: Added Authorization header masking requirement
 
 Templates Status:
-✅ plan-template.md - No changes needed (references constitution principles)
+✅ plan-template.md - Updated to include HTTP logging requirements
 ✅ spec-template.md - No changes needed (references constitution principles)
-✅ tasks-template.md - No changes needed (references constitution principles)
+✅ tasks-template.md - Updated to include HTTP client setup tasks
 ✅ agent-file-template.md - No changes needed
 ✅ checklist-template.md - No changes needed
 
 Files Requiring Updates:
-✅ All test files updated to follow new test quality standards
+✅ src/proxies/apiInterceptor.ts - Updated to mask Authorization headers
+✅ src/services/LineNotificationService.ts - Updated to use axios interceptors
+✅ specs/001-line-execution-notify/plan.md - Updated requirements
+✅ specs/001-line-execution-notify/tasks.md - Updated task list
 
 Follow-up TODOs:
 - None
@@ -112,9 +117,18 @@ Follow-up TODOs:
   - Log levels: error, warn, info, debug
   - Include context: service name, operation, relevant IDs, timestamps
   - NO sensitive data (API keys, passwords, tokens) in logs
+- **HTTP Client Logging Requirements:**
+  - **All HTTP clients MUST use axios with interceptors for automatic request/response logging**
+  - MUST use `setupApiInterceptors()` from `src/proxies/apiInterceptor.ts` for all axios instances
+  - Request logs MUST include: HTTP method, URL, headers (masked), request body/params
+  - Response logs MUST include: HTTP status, response data
+  - Error logs MUST include: status code, error message, response data, headers (masked)
+  - **Authorization headers MUST be masked** (show only first 10 characters + "...")
+  - Other sensitive headers (API keys, tokens) MUST be masked following same pattern
+  - This ensures consistent, traceable HTTP communication logs across all services
 - **Tracing Requirements:**
   - All service entry points MUST log start/completion
-  - External API calls MUST log: endpoint, duration, status
+  - External API calls logging handled automatically by axios interceptors
   - Error scenarios MUST log: full error context, stack trace, recovery action
   - Transaction IDs SHOULD be propagated through service calls
 - **Monitoring Hooks:**
@@ -134,7 +148,7 @@ Follow-up TODOs:
   - All retry attempts MUST be logged with reason and outcome
   - Failed orders after all retries MUST be clearly logged for manual review
 
-**Rationale**: Enables rapid debugging in production, facilitates root cause analysis, prevents indefinite hangs in console application, and ensures safe error recovery for financial trading operations where duplicate orders can cause monetary loss.
+**Rationale**: Enables rapid debugging in production, facilitates root cause analysis, prevents indefinite hangs in console application, ensures consistent HTTP logging across all external API integrations with proper security (masked credentials), and ensures safe error recovery for financial trading operations where duplicate orders can cause monetary loss.
 
 ## Quality Gates
 
@@ -250,4 +264,4 @@ Follow-up TODOs:
    - Trade-offs between principles MUST be explicitly documented
    - Alternative simpler approaches MUST be considered and documented if rejected
 
-**Version**: 1.0.2 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-03
+**Version**: 1.1.0 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-03

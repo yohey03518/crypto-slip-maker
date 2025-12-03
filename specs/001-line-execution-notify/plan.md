@@ -53,13 +53,18 @@ Add Line Messaging API integration to send a single summary notification after a
 
 ### ✅ Principle IV: Observability & Tracing
 - **Status**: PASS
+- **HTTP Client Logging Requirements**:
+  - LineNotificationService MUST use axios with setupApiInterceptors() for automatic request/response logging
+  - Request logs include: HTTP method, URL, masked headers, request body
+  - Response logs include: HTTP status, response data
+  - Authorization headers MUST be masked (first 10 chars + "...")
+  - Consistent logging pattern across all HTTP clients (Max, Bito, Hoya, Line)
 - **Logging Requirements**:
   - Service entry/exit logging for LineNotificationService
   - Log all notification attempts (success/failure)
-  - Log HTTP request details (endpoint, duration, status) for Line API calls
-  - Log full request/response including auth headers on retry failure (per spec requirement)
-  - NO sensitive data in regular logs (token masked in success logs)
-- **Timeout Handling**: 5-second explicit timeout for Line API calls (per spec)
+  - HTTP logging automatically handled by axios interceptors
+  - NO sensitive data in logs (Authorization headers masked by interceptor)
+- **Timeout Handling**: 5-second explicit timeout configured in axios instance
 - **Error Recovery**: Retry once after 2 seconds on failure; log final outcome
 
 ### Quality Gates Applicability

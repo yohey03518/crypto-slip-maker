@@ -103,10 +103,11 @@ Single project structure:
 - [X] T024 [US1] Add message length validation (5000 char limit) in src/utils/messageFormatter.ts
 
 **Step 2: Line API Integration**
-- [X] T025 [US1] Create LineNotificationService class skeleton in src/services/LineNotificationService.ts
+- [X] T024a [US1] Update apiInterceptor.ts to mask Authorization headers in request/response logs (show first 10 chars + "...")
+- [X] T025 [US1] Create LineNotificationService class skeleton with axios instance using setupApiInterceptors() in src/services/LineNotificationService.ts
 - [X] T026 [US1] Implement sendWithRetry() private method with 2-second delay retry logic in src/services/LineNotificationService.ts
 - [X] T027 [US1] Implement sendSummary() public method in src/services/LineNotificationService.ts
-- [X] T028 [US1] Add comprehensive logging (entry/exit, attempts, success/failure, full details on final failure) in src/services/LineNotificationService.ts
+- [X] T028 [US1] Add comprehensive logging (entry/exit, attempts, success/failure) in src/services/LineNotificationService.ts (HTTP request/response logging handled by interceptor)
 - [X] T029 [US1] Add error handling for missing config (warn and skip notification) in src/services/LineNotificationService.ts
 
 **Step 3: Result Aggregation in server.ts**
@@ -259,11 +260,11 @@ For each user story:
 
 ## Task Summary
 
-- **Total Tasks**: 39 (removed test directory creation task)
+- **Total Tasks**: 40 (added apiInterceptor masking task)
 - **Setup (Phase 1)**: 2 tasks
 - **Foundational (Phase 2)**: 3 tasks
 - **User Story 2 (Phase 3)**: 6 tasks (2 tests + 4 implementation)
-- **User Story 1 (Phase 4)**: 22 tasks (9 tests + 13 implementation)
+- **User Story 1 (Phase 4)**: 23 tasks (9 tests + 14 implementation, including HTTP logging setup)
 - **Polish (Phase 5)**: 6 tasks
 - **Parallel Opportunities**: 28 tasks marked [P] (70% of tasks can run in parallel)
 - **Independent Test Criteria**: Each user story has clear acceptance criteria from spec.md
