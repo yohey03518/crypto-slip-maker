@@ -10,6 +10,10 @@
 ### Session 2025-12-03
 
 - Q: Which Line Messaging API notification method should be used? → A: Push message to a specific user ID (requires LINE_USER_ID)
+- Q: When a Line API notification fails, should the system retry? → A: Retry once after a brief delay (e.g., 2 seconds)
+- Q: What HTTP timeout should be used for Line API calls? → A: 5 seconds
+- Q: What is the maximum message length for Line notifications? → A: 5000 characters
+- Q: Should the notification message include error details when exchanges fail? → A: No - only show success/failed status (details in logs)
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -49,11 +53,11 @@ The system administrator can configure Line notification credentials through env
 
 ### Edge Cases
 
-- What happens when the Line API is unreachable or returns an error? System should log the notification failure but all trade operations should have already completed successfully
+- What happens when the Line API is unreachable or returns an error? System retries once after 2 seconds, logs the notification failure if both attempts fail, but all trade operations should have already completed successfully
 - What happens when some exchanges complete while others are still executing? System waits for all enabled exchanges to finish before sending the single summary notification
-- What happens when the notification message exceeds Line API message length limits? System should format the message to fit within limits while preserving all exchange status information
+- What happens when the notification message exceeds Line API message length limits (5000 characters)? System should format the message to fit within the limit while preserving all exchange status information, prioritizing status over verbosity
 - What happens when Line credentials expire or become invalid? System should log authentication errors but trade execution results are preserved in logs
-- What happens when network connectivity is intermittent at notification time? System should attempt to send with appropriate timeout handling and log the result
+- What happens when network connectivity is intermittent at notification time? System attempts initial send with 5-second timeout, retries once after 2 seconds if failed (with 5-second timeout), and logs the final result
 - What happens when only one exchange is enabled? System still sends a notification with that single exchange's status
 
 ## Requirements *(mandatory)*
@@ -70,6 +74,10 @@ The system administrator can configure Line notification credentials through env
 - **FR-008**: System MUST support sending notifications through Line Messaging API channel (Official Account)
 - **FR-009**: System MUST handle Line API errors gracefully without impacting the visibility of trade execution results in logs
 - **FR-010**: System MUST collect and aggregate execution results from all exchanges before composing the summary message
+- **FR-011**: System MUST retry Line notification once after a 2-second delay if the initial attempt fails, then log final failure if retry also fails
+- **FR-012**: System MUST use a 5-second HTTP timeout for all Line API calls
+- **FR-013**: System MUST ensure notification messages do not exceed 5000 characters (Line API push message limit)
+- **FR-014**: System MUST include only exchange names and success/failed status in notifications, without error details (error details remain in logs only)
 
 ### Key Entities
 
@@ -83,7 +91,7 @@ The system administrator can configure Line notification credentials through env
 ### Measurable Outcomes
 
 - **SC-001**: System administrator receives exactly one Line notification per application run, regardless of the number of enabled exchanges
-- **SC-002**: Summary notification is sent within 5 seconds after the last exchange completes its execution
+- **SC-002**: Summary notification is sent (or final retry attempted) within 12 seconds after the last exchange completes its execution (5s timeout + 2s delay + 5s retry timeout)
 - **SC-003**: 100% of exchange execution results (both success and failure) are included in the summary notification
 - **SC-004**: System administrator can determine the status of all exchanges from the single notification message without requiring access to logs
 - **SC-005**: Notification message format is consistent and parseable, clearly distinguishing successful exchanges from failed ones
