@@ -80,7 +80,7 @@ The system administrator can configure Line notification credentials and control
 - **FR-004**: System MUST format the summary message in a concise, readable format listing successful exchanges together and failed exchanges together (e.g., "Max and Bito Success, Hoya failed")
 - **FR-005**: System MUST integrate with Line Messaging API using direct REST API calls without external libraries
 - **FR-006**: System MUST allow configuration of Line notification credentials and exchange enablement through environment variables (LINE_CHANNEL_ACCESS_TOKEN, LINE_USER_ID, RUN_MAX, RUN_BITO, RUN_HOYA)
-- **FR-007**: System MUST log all notification attempts (both successful and failed) for audit purposes, including full HTTP request/response details with auth headers when Line API calls fail after both retry attempts
+- **FR-007**: System MUST log all notification attempts (both successful and failed) for audit purposes, including full HTTP request/response details with auth headers when Line API calls fail after both retry attempts. Note: Channel access token in Authorization header MUST be partially masked in logs (e.g., "Bearer tok***123") to comply with security best practices while maintaining audit trail
 - **FR-008**: System MUST support sending notifications through Line Messaging API channel (Official Account)
 - **FR-009**: System MUST handle Line API errors gracefully without impacting the visibility of trade execution results in logs
 - **FR-010**: System MUST collect and aggregate execution results from all exchanges before composing the summary message

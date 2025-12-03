@@ -154,19 +154,15 @@ src/
 │   ├── MaxApiConfig.ts         # [Existing]
 │   └── LineConfig.ts           # [NEW] Line API configuration
 └── server.ts                   # [MODIFY - requires approval] Aggregate results & send notification
-
-tests/                          # [NEW DIRECTORY]
-├── unit/
-│   ├── messageFormatter.test.ts
-│   ├── resultAggregator.test.ts
-│   └── lineNotificationService.test.ts
-├── integration/
-│   └── lineNotification.integration.test.ts
-└── contract/
-    └── lineApi.contract.test.ts
 ```
 
-**Structure Decision**: Single project structure maintained (Option 1). All new code in new files except controlled modification to `src/server.ts` for result aggregation. Tests directory created at root level following convention. Brownfield safety maintained by isolating changes to new modules and minimal, explicit modifications to existing orchestration logic.
+**Test Structure**: Tests are located in `Tests` subdirectories alongside source files:
+- `src/services/Tests/LineNotificationService.test.ts`
+- `src/utils/Tests/messageFormatter.test.ts`
+- `src/config/Tests/LineConfig.test.ts`
+- `src/types/Tests/executionResult.test.ts`
+
+**Structure Decision**: Single project structure maintained (Option 1). All new code in new files except controlled modification to `src/server.ts` for result aggregation. Tests follow `Tests` subdirectory convention (e.g., `src/services/Tests/`). Brownfield safety maintained by isolating changes to new modules and minimal, explicit modifications to existing orchestration logic.
 
 ## Complexity Tracking
 

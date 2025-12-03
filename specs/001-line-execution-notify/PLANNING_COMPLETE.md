@@ -91,15 +91,13 @@ src/
 └── utils/
     └── messageFormatter.ts              # Message formatting logic
 
-tests/
-├── unit/
-│   ├── messageFormatter.test.ts         # Format logic tests
-│   ├── resultAggregator.test.ts         # Result collection tests
-│   └── lineNotificationService.test.ts  # Service unit tests
-├── integration/
-│   └── lineNotification.integration.test.ts  # API integration tests
-└── contract/
-    └── lineApi.contract.test.ts         # Line API contract tests
+**Test Structure**: Tests are located in `Tests` subdirectories alongside source files:
+- `src/services/Tests/LineNotificationService.test.ts` - Service unit and integration tests
+- `src/utils/Tests/messageFormatter.test.ts` - Message formatting tests
+- `src/config/Tests/LineConfig.test.ts` - Configuration tests
+- `src/types/Tests/executionResult.test.ts` - Type and fixture tests
+
+Note: Result aggregation logic is tested as part of server.ts integration tests (no separate resultAggregator module).
 ```
 
 ### Modified Files (Requires Approval)

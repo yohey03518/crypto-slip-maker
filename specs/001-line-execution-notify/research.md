@@ -26,8 +26,8 @@
 **Implementation**:
 ```json
 // Add to package.json scripts
-"test": "node --import tsx --test 'tests/**/*.test.ts'",
-"test:watch": "node --import tsx --test --watch 'tests/**/*.test.ts'"
+"test": "node --import tsx --test 'src/**/Tests/*.test.ts'",
+"test:watch": "node --import tsx --test --watch 'src/**/Tests/*.test.ts'"
 ```
 
 ### 2. Line Messaging API Integration
@@ -269,9 +269,9 @@ if (results.length > 0) {
 
 ### Test Execution
 ```bash
-npm run test          # Run all tests once
-npm run test:watch    # Watch mode during development
-npm run build && npm run test  # Pre-commit validation
+pnpm run test          # Run all tests once
+pnpm run test:watch    # Watch mode during development
+pnpm run build && pnpm run test  # Pre-commit validation
 ```
 
 ## Open Questions

@@ -235,7 +235,7 @@ components:
             text: Max and Bito Success, Hoya failed
 
 # Contract Testing Scenarios
-# These scenarios should be covered in contract tests (tests/contract/lineApi.contract.test.ts):
+# These scenarios should be covered in contract tests (src/services/Tests/LineNotificationService.test.ts):
 #
 # 1. Request Structure Validation:
 #    - Valid request with all required fields → 200 OK
