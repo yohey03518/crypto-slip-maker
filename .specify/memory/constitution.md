@@ -1,31 +1,33 @@
 <!--
 Sync Impact Report
 ==================
-Version Change: INITIAL → 1.0.0
+Version Change: 1.0.0 → 1.0.1
 
-Constitution Type: Initial ratification for brownfield project
+Constitution Type: Clarification update
 
-Principles Defined:
-- I. Test-Driven Development (TDD) - Mandatory testing discipline
-- II. Code Quality & Design Principles - SOLID, KISS, maintainability, async/await
-- III. Brownfield Safety Protocol - Protection of existing code
-- IV. Observability & Tracing - Debugging, monitoring, crypto-safe retry logic
+Changes Made:
+- Added package manager specification (pnpm) to Development Workflow section
+- Clarified that pnpm is the standard package manager for this project
 
-Sections Added:
-- Core Principles (4 principles)
-- Quality Gates (Test, Code Quality, Observability)
-- Development Workflow (with commit message traceability)
-- Governance
+Principles Modified:
+- None (no principle changes)
+
+Sections Modified:
+- Development Workflow: Added package manager specification
 
 Templates Status:
-✅ plan-template.md - Constitution Check section aligns with all 4 principles
-✅ spec-template.md - User scenarios and requirements align with TDD approach
-✅ tasks-template.md - Test-first task organization supports TDD mandate
-✅ agent-file-template.md - Reviewed for alignment
-✅ checklist-template.md - Reviewed for alignment
+✅ plan-template.md - No changes needed (no package manager references)
+✅ spec-template.md - No changes needed (no package manager references)
+✅ tasks-template.md - No changes needed (generic template)
+✅ agent-file-template.md - No changes needed
+✅ checklist-template.md - No changes needed
+
+Files Requiring Updates:
+✅ specs/001-line-execution-notify/tasks.md - Updated npm references to pnpm
+⚠️ .specify/scripts/bash/update-agent-context.sh - Contains npm reference (line 257) - may need update if used
 
 Follow-up TODOs:
-- None: All placeholders filled, all templates aligned
+- Review update-agent-context.sh script to determine if npm reference should be updated to pnpm
 -->
 
 # Crypto-Slip-Maker Constitution
@@ -153,6 +155,11 @@ Follow-up TODOs:
 
 2. **Implementation Phase:**
    - Create feature branch following pattern: `###-feature-name`
+   - **Package Manager**: This project uses `pnpm` as the package manager. All package management commands MUST use `pnpm` instead of `npm` or `yarn`:
+     - Install dependencies: `pnpm install`
+     - Run scripts: `pnpm run <script>` or `pnpm <script>`
+     - Add dependencies: `pnpm add <package>`
+     - Add dev dependencies: `pnpm add -D <package>`
    - For each task:
      - Write tests FIRST (must fail)
      - Implement code to pass tests
@@ -231,4 +238,4 @@ Follow-up TODOs:
    - Trade-offs between principles MUST be explicitly documented
    - Alternative simpler approaches MUST be considered and documented if rejected
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-03
+**Version**: 1.0.1 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-03
