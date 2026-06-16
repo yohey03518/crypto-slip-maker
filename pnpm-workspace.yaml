@@ -1,0 +1,3 @@
+# Configure allowed build scripts for pnpm v11+
+allowBuilds:
+  esbuild: true
