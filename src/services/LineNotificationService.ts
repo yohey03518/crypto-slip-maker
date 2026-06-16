@@ -67,16 +67,17 @@ export class LineNotificationService {
    * Retries once after a delay if the initial attempt fails
    * 
    * @param message The formatted message text to send
+   * @param toUserId Optional recipient user ID (defaults to regular user ID)
    * @throws Error if all attempts fail
    */
-  private async sendWithRetry(message: string): Promise<void> {
+  private async sendWithRetry(message: string, toUserId?: string): Promise<void> {
     const maxAttempts = this.config.maxRetries + 1; // maxRetries=1 means 2 total attempts
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         logger.info(`[LineNotificationService] Attempt ${attempt}/${maxAttempts}: Sending notification`);
         
-        await this.sendPushMessage(message);
+        await this.sendPushMessage(message, toUserId);
         
         logger.info(`[LineNotificationService] Attempt ${attempt} succeeded`);
         return; // Success - exit retry loop
@@ -106,11 +107,12 @@ export class LineNotificationService {
    * Send a push message to Line Messaging API
    * 
    * @param message The message text to send
+   * @param toUserId Optional recipient user ID (defaults to regular user ID)
    * @throws Error if the API call fails
    */
-  private async sendPushMessage(message: string): Promise<void> {
+  private async sendPushMessage(message: string, toUserId?: string): Promise<void> {
     const requestBody = {
-      to: this.config.userId,
+      to: toUserId || this.config.userId,
       messages: [
         {
           type: 'text',
@@ -132,6 +134,58 @@ export class LineNotificationService {
       requestBody,
       requestConfig
     );
+  }
+
+  /**
+   * Send administrator notification for a failed exchange API request
+   * 
+   * @param exchangeName Name of the exchange (e.g. Max, Bito)
+   * @param error The error object thrown
+   */
+  async sendAdminError(exchangeName: string, error: unknown): Promise<void> {
+    if (!axios.isAxiosError(error)) {
+      logger.info(`[LineNotificationService] Error for ${exchangeName} is not an AxiosError. Skipping admin notification.`);
+      return;
+    }
+
+    const adminUserId = process.env.LINE_ADMIN_USER_ID;
+    if (!adminUserId) {
+      logger.warn('[LineNotificationService] LINE_ADMIN_USER_ID environment variable is not set. Skipping admin notification.');
+      return;
+    }
+
+    const userName = process.env.USER_NAME || 'Unknown User';
+    const request = error.config;
+    const response = error.response;
+
+    if (!request) {
+      logger.warn('[LineNotificationService] AxiosError has no config. Skipping admin notification.');
+      return;
+    }
+
+    const method = request.method?.toUpperCase() || 'UNKNOWN';
+    const fullUrl = request.baseURL ? `${request.baseURL}${request.url}` : request.url || '';
+    const requestBody = request.data || request.params || {};
+    
+    const status = response?.status || 'unknown';
+    const responseBody = response?.data || 'No response body';
+
+    const message = `${userName} ${exchangeName} got error. The error request and response:\n` +
+      `[${method}] ${fullUrl}\n` +
+      `Request Body: ${typeof requestBody === 'object' ? JSON.stringify(requestBody) : requestBody}\n` +
+      `Response Status: ${status}\n` +
+      `Response Body: ${typeof responseBody === 'object' ? JSON.stringify(responseBody) : responseBody}`;
+
+    if (!validateMessageLength(message)) {
+      logger.error(`[LineNotificationService] Admin error message exceeds 5000 character limit: ${message.length} characters`);
+    }
+
+    try {
+      await this.sendWithRetry(message, adminUserId);
+      logger.info(`[LineNotificationService] Admin error notification sent for ${exchangeName}`);
+    } catch (err) {
+      logger.error(`[LineNotificationService] Failed to send admin error notification for ${exchangeName}:`, err instanceof Error ? err.message : 'Unknown error');
+    }
   }
 
   /**
