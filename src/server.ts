@@ -53,6 +53,19 @@ async function main(): Promise<void> {
         results.push({ exchangeName: name, success: false });
         logger.error(`${name} exchange failed:`, error instanceof Error ? error.message : 'Unknown error');
         
+        // Send admin notification for API errors (excluding Hoya)
+        if (name !== 'Hoya') {
+          try {
+            const lineConfig = loadAndValidateLineConfig();
+            if (lineConfig) {
+              const notificationService = new LineNotificationService(lineConfig);
+              await notificationService.sendAdminError(name, error);
+            }
+          } catch (notifError) {
+            logger.error(`Failed to send admin notification for ${name} error:`, notifError instanceof Error ? notifError.message : 'Unknown error');
+          }
+        }
+
         // Continue to next exchange (don't re-throw)
       }
     }
