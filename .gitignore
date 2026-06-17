@@ -6,3 +6,4 @@ dist/
 *.tmp
 *.swp
 coverage/ 
+.env

@@ -4,11 +4,9 @@ import { config } from 'dotenv';
 import { logger } from './utils/logger.js';
 import { MaxSlipService } from './services/MaxSlipService.js';
 import { BitoSlipService } from './services/BitoSlipService.js';
-import { HoyaSlipService } from './services/HoyaSlipService.js';
 import { LineNotificationService } from './services/LineNotificationService.js';
 import { loadAndValidateLineConfig } from './config/LineConfig.js';
 import type { ExecutionResult, ExchangeName } from './types/executionResult.js';
-import axios from 'axios';
 
 // Load environment variables
 config();
@@ -29,9 +27,9 @@ async function main(): Promise<void> {
       servicesConfig.push({ name: 'Bito', service: Container.get(BitoSlipService) });
     }
 
-    if (process.env.RUN_HOYA === 'true') {
-      servicesConfig.push({ name: 'Hoya', service: Container.get(HoyaSlipService) });
-    }
+    // if (process.env.RUN_HOYA === 'true') {
+    //   servicesConfig.push({ name: 'Hoya', service: Container.get(HoyaSlipService) });
+    // }
 
     // Handle case where no exchanges are enabled
     if (servicesConfig.length === 0) {
