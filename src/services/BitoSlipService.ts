@@ -55,6 +55,8 @@ export class BitoSlipService {
         });
         logger.info('Order:', order);
 
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         const orderDetail = await this.monitorOrder(order.id, Date.now());
         logger.info('Order detail:', orderDetail);
 
@@ -75,6 +77,8 @@ export class BitoSlipService {
                     price: Math.floor(highestBidPrice * 1000) / 1000,
                 });
                 logger.info('Sell order:', sellOrder);
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
                 const sellOrderDetail = await this.monitorOrder(sellOrder.id, Date.now());
                 logger.info('Sell order detail:', sellOrderDetail);
