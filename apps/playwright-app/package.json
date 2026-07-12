@@ -1,0 +1,26 @@
+{
+  "name": "playwright-app",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc && node dist/server.js",
+    "start": "node dist/server.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@crypto-slip-maker/shared": "workspace:*",
+    "playwright": "^1.44.0",
+    "dotenv": "^16.0.3",
+    "reflect-metadata": "^0.2.1",
+    "typedi": "^0.10.0",
+    "otplib": "^12.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.x",
+    "typescript": "^5.x",
+    "@types/dotenv": "^8.2.0",
+    "@types/otplib": "^10.0.0"
+  }
+}
