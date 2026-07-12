@@ -3,6 +3,7 @@ export * from './utils/messageFormatter.js';
 export * from './utils/apiInterceptor.js';
 export * from './config/LineConfig.js';
 export * from './services/LineNotificationService.js';
+export * from './types.js';
 export * from './types/exchange.js';
 export * from './types/executionResult.js';
 export * from './types/marketDepth.js';

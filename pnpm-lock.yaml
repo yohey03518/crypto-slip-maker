@@ -7,7 +7,16 @@ settings:
 importers:
 
   .:
+    devDependencies:
+      typescript:
+        specifier: ^5.x
+        version: 5.7.3
+
+  apps/api-app:
     dependencies:
+      '@crypto-slip-maker/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@types/qs':
         specifier: ^6.9.18
         version: 6.9.18
@@ -20,9 +29,6 @@ importers:
       otplib:
         specifier: ^12.0.1
         version: 12.0.1
-      playwright:
-        specifier: ^1.42.1
-        version: 1.53.2
       qs:
         specifier: ^6.14.0
         version: 6.14.0
@@ -33,9 +39,6 @@ importers:
         specifier: ^0.10.0
         version: 0.10.0
     devDependencies:
-      '@playwright/test':
-        specifier: ^1.42.1
-        version: 1.53.2
       '@types/dotenv':
         specifier: ^8.2.0
         version: 8.2.3
@@ -45,6 +48,68 @@ importers:
       '@types/otplib':
         specifier: ^10.0.0
         version: 10.0.0
+      tsx:
+        specifier: ^4.x
+        version: 4.19.2
+      typescript:
+        specifier: ^5.x
+        version: 5.7.3
+
+  apps/playwright-app:
+    dependencies:
+      '@crypto-slip-maker/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      dotenv:
+        specifier: ^16.0.3
+        version: 16.4.7
+      otplib:
+        specifier: ^12.0.1
+        version: 12.0.1
+      playwright:
+        specifier: ^1.44.0
+        version: 1.61.1
+      reflect-metadata:
+        specifier: ^0.2.1
+        version: 0.2.2
+      typedi:
+        specifier: ^0.10.0
+        version: 0.10.0
+    devDependencies:
+      '@types/dotenv':
+        specifier: ^8.2.0
+        version: 8.2.3
+      '@types/node':
+        specifier: ^20.x
+        version: 20.17.16
+      '@types/otplib':
+        specifier: ^10.0.0
+        version: 10.0.0
+      typescript:
+        specifier: ^5.x
+        version: 5.7.3
+
+  packages/shared:
+    dependencies:
+      axios:
+        specifier: ^1.x
+        version: 1.7.9
+      dotenv:
+        specifier: ^16.0.3
+        version: 16.4.7
+      qs:
+        specifier: ^6.14.0
+        version: 6.14.0
+      reflect-metadata:
+        specifier: ^0.2.1
+        version: 0.2.2
+      typedi:
+        specifier: ^0.10.0
+        version: 0.10.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.x
+        version: 20.17.16
       tsx:
         specifier: ^4.x
         version: 4.19.2
@@ -203,20 +268,18 @@ packages:
 
   '@otplib/plugin-crypto@12.0.1':
     resolution: {integrity: sha512-qPuhN3QrT7ZZLcLCyKOSNhuijUi9G5guMRVrxq63r9YNOxxQjPm59gVxLM+7xGnHnM6cimY57tuKsjK7y9LM1g==}
+    deprecated: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
 
   '@otplib/plugin-thirty-two@12.0.1':
     resolution: {integrity: sha512-MtT+uqRso909UkbrrYpJ6XFjj9D+x2Py7KjTO9JDPhL0bJUYVu5kFP4TFZW4NFAywrAtFRxOVY261u0qwb93gA==}
+    deprecated: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
 
   '@otplib/preset-default@12.0.1':
     resolution: {integrity: sha512-xf1v9oOJRyXfluBhMdpOkr+bsE+Irt+0D5uHtvg6x1eosfmHCsCC6ej/m7FXiWqdo0+ZUI6xSKDhJwc8yfiOPQ==}
+    deprecated: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
 
   '@otplib/preset-v11@12.0.1':
     resolution: {integrity: sha512-9hSetMI7ECqbFiKICrNa4w70deTUfArtwXykPUvSHWOdzOlfa9ajglu7mNCntlvxycTiOAXkQGwjQCzzDEMRMg==}
-
-  '@playwright/test@1.53.2':
-    resolution: {integrity: sha512-tEB2U5z74ebBeyfGNZ3Jfg29AnW+5HlWhvHtb/Mqco9pFdZU1ZLNdVb2UtB5CvmiilNr2ZfVH/qMmAROG/XTzw==}
-    engines: {node: '>=18'}
-    hasBin: true
 
   '@types/dotenv@8.2.3':
     resolution: {integrity: sha512-g2FXjlDX/cYuc5CiQvyU/6kkbP1JtmGzh0obW50zD7OKeILVL0NSpPWLXVfqoAGQjom2/SLLx9zHq0KXvD6mbw==}
@@ -347,13 +410,13 @@ packages:
   otplib@12.0.1:
     resolution: {integrity: sha512-xDGvUOQjop7RDgxTQ+o4pOol0/3xSZzawTiPKRrHnQWAy0WjhNs/5HdIDJCrqC4MBynmjXgULc6YfioaxZeFgg==}
 
-  playwright-core@1.53.2:
-    resolution: {integrity: sha512-ox/OytMy+2w1jcYEYlOo1Hhp8hZkLCximMTUTMBXjGUA1KoFfiSZ+DU+3a739jsPY0yoKH2TFy9S2fsJas8yAw==}
+  playwright-core@1.61.1:
+    resolution: {integrity: sha512-h7Qlt6m4REp25qvIdvbDtVmD4LqVXfpRxhORv9L0jzETM05p4fuPJ3dKyuSXQxDSbXnmS79HAgi9589lGSpLkg==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.53.2:
-    resolution: {integrity: sha512-6K/qQxVFuVQhRQhFsVZ9fGeatxirtrpPgxzBYWyZLEXJzqYwuL4fuNmfOfD5et1tJE4GScKyPNeLhZeRwuTU3A==}
+  playwright@1.61.1:
+    resolution: {integrity: sha512-DWnY5o3YbLWK4GovuAVwpqL+1VwGNdUGrRr++8j8PtQQzvAVZUIMjKQ90fY689sEJZJBbZVw1rXaOKSTitkzPQ==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -503,10 +566,6 @@ snapshots:
       '@otplib/plugin-crypto': 12.0.1
       '@otplib/plugin-thirty-two': 12.0.1
 
-  '@playwright/test@1.53.2':
-    dependencies:
-      playwright: 1.53.2
-
   '@types/dotenv@8.2.3':
     dependencies:
       dotenv: 16.4.7
@@ -652,11 +711,11 @@ snapshots:
       '@otplib/preset-default': 12.0.1
       '@otplib/preset-v11': 12.0.1
 
-  playwright-core@1.53.2: {}
+  playwright-core@1.61.1: {}
 
-  playwright@1.53.2:
+  playwright@1.61.1:
     dependencies:
-      playwright-core: 1.53.2
+      playwright-core: 1.61.1
     optionalDependencies:
       fsevents: 2.3.2
 
