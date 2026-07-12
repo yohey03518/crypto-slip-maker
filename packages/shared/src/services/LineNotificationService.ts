@@ -5,7 +5,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { Service } from 'typedi';
 import { logger } from '../utils/logger.js';
-import { setupApiInterceptors } from '../proxies/apiInterceptor.js';
+import { setupApiInterceptors } from '../utils/apiInterceptor.js';
 import { formatSummaryMessage, validateMessageLength } from '../utils/messageFormatter.js';
 import type { ExecutionResult } from '../types/executionResult.js';
 import type { LineNotificationConfig } from '../config/LineConfig.js';
