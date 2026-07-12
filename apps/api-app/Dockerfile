@@ -9,6 +9,7 @@ RUN npm i -g pnpm
 COPY package*.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/shared/package*.json ./packages/shared/
 COPY apps/api-app/package*.json ./apps/api-app/
+COPY apps/playwright-app/package*.json ./apps/playwright-app/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
