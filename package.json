@@ -13,6 +13,10 @@
     "dev:playwright": "pnpm --filter playwright-app dev"
   },
   "devDependencies": {
-    "typescript": "^5.x"
+    "typescript": "^6.0.0",
+    "tsx": "^4.x",
+    "@types/node": "^20.x",
+    "@types/dotenv": "^8.2.0",
+    "@types/otplib": "^10.0.0"
   }
 }

@@ -16,10 +16,5 @@
     "dotenv": "^16.0.3",
     "reflect-metadata": "^0.2.1",
     "typedi": "^0.10.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.x",
-    "tsx": "^4.x",
-    "typescript": "^5.x"
   }
 }
