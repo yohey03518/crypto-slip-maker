@@ -3,7 +3,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install pnpm
-RUN npm i -g pnpm
+RUN npm i -g pnpm@10
 
 # Copy workspace configurations
 COPY package*.json pnpm-workspace.yaml pnpm-lock.yaml ./
@@ -16,7 +16,7 @@ RUN pnpm install --frozen-lockfile
 
 # Copy all sources and build
 COPY . .
-RUN pnpm --filter api-app build
+RUN pnpm --filter api-app... build
 
 # Command to run API App
 CMD ["pnpm", "start:api"]

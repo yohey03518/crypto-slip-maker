@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/playwright:v1.44.0-jammy AS builder
 
 WORKDIR /app
 
-RUN npm i -g pnpm
+RUN npm i -g pnpm@10
 
 COPY package*.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/shared/package*.json ./packages/shared/
@@ -12,6 +12,6 @@ COPY apps/api-app/package*.json ./apps/api-app/
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm --filter playwright-app build
+RUN pnpm --filter playwright-app... build
 
 CMD ["pnpm", "start:playwright"]
