@@ -1,8 +1,6 @@
 import { Service } from 'typedi';
 import { BitoApi } from '../proxies/bitoExchangeProxy.js';
-import { logger } from '../utils/logger.js';
-import { Order } from '../types/order.js';
-import { TradingCurrency } from '../types.js';
+import { logger, Order, TradingCurrency } from '@crypto-slip-maker/shared';
 @Service()
 export class BitoSlipService {
     private readonly orderMonitoringTimeoutMs = 60000;

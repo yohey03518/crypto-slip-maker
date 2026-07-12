@@ -1,12 +1,10 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
 import { config } from 'dotenv';
-import { logger } from './utils/logger.js';
+import { logger, LineNotificationService, loadAndValidateLineConfig } from '@crypto-slip-maker/shared';
+import type { ExecutionResult, ExchangeName } from '@crypto-slip-maker/shared';
 import { MaxSlipService } from './services/MaxSlipService.js';
 import { BitoSlipService } from './services/BitoSlipService.js';
-import { LineNotificationService } from './services/LineNotificationService.js';
-import { loadAndValidateLineConfig } from './config/LineConfig.js';
-import type { ExecutionResult, ExchangeName } from './types/executionResult.js';
 
 // Load environment variables
 config();

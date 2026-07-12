@@ -2,8 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { BitoSlipService } from '../BitoSlipService.js';
 import { BitoApi } from '../../proxies/bitoExchangeProxy.js';
-import { MarketDepthResponse } from '../../types/marketDepth.js';
-import { Order } from '../../types/order.js';
+import { MarketDepthResponse, Order } from '@crypto-slip-maker/shared';
 
 describe('BitoSlipService order delays', () => {
     it('should wait 1 second after placing buy and sell orders', async () => {
