@@ -26,11 +26,11 @@ export class HoyaSlipService {
         if (!this.page) return;
         
         try {
-            // Capture screenshot as base64
-            const screenshot = await this.page.screenshot({ 
+            const buffer = await this.page.screenshot({ 
                 type: 'png',
                 fullPage: true
-            }).then(buffer => buffer.toString('base64'));
+            });
+            const screenshot = buffer.toString('base64');
             
             logger.error(`Screenshot for ${errorContext}:
 === BEGIN SCREENSHOT ===
