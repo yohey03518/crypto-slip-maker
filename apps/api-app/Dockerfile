@@ -15,7 +15,7 @@ RUN pnpm install --frozen-lockfile
 
 # Copy all sources and build
 COPY . .
-RUN pnpm build
+RUN pnpm --filter api-app build
 
 # Command to run API App
 CMD ["pnpm", "start:api"]

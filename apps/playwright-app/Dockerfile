@@ -11,6 +11,6 @@ COPY apps/playwright-app/package*.json ./apps/playwright-app/
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm build
+RUN pnpm --filter playwright-app build
 
 CMD ["pnpm", "start:playwright"]
