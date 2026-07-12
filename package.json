@@ -1,36 +1,22 @@
 {
-  "name": "crypto-slip-maker",
+  "name": "crypto-slip-maker-monorepo",
+  "private": true,
   "version": "1.0.0",
-  "description": "simple crypto trader to make slip",
-  "main": "dist/server.js",
-  "type": "module",
+  "description": "Monorepo workspace for crypto slip maker apps",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc && node dist/server.js",
-    "start": "node dist/server.js",
-    "type-check": "tsc --noEmit",
-    "test": "node --import tsx --test 'src/**/Tests/*.test.ts'",
-    "test:watch": "node --import tsx --test --watch 'src/**/Tests/*.test.ts'"
-  },
-  "dependencies": {
-    "@types/qs": "^6.9.18",
-    "axios": "^1.x",
-    "qs": "^6.14.0",
-    "dotenv": "^16.0.3",
-    "reflect-metadata": "^0.2.1",
-    "typedi": "^0.10.0",
-    "otplib": "^12.0.1"
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "type-check": "pnpm -r type-check",
+    "start:api": "pnpm --filter api-app start",
+    "start:playwright": "pnpm --filter playwright-app start",
+    "dev:api": "pnpm --filter api-app dev",
+    "dev:playwright": "pnpm --filter playwright-app dev"
   },
   "devDependencies": {
-    "@types/node": "^20.x",
+    "typescript": "^6.0.0",
     "tsx": "^4.x",
-    "typescript": "^5.x",
+    "@types/node": "^20.x",
     "@types/dotenv": "^8.2.0",
     "@types/otplib": "^10.0.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   }
 }

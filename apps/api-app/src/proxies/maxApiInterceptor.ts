@@ -1,5 +1,5 @@
 import { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import { logger } from '../utils/logger.js';
+import { logger } from '@crypto-slip-maker/shared';
 import { inspect } from 'util';
 
 function formatForLog(obj: unknown): string {

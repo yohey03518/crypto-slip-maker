@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { createHmac } from 'crypto';
 import * as qs from 'qs';
-import { OrderRequest, TradingCurrency } from '../types.js';
+import { OrderRequest, TradingCurrency, logger, setupApiInterceptors, MarketDepthResponse, PriceLevel, Order, Status, ExchangeApi } from '@crypto-slip-maker/shared';
 import { 
     BitoMarketDepthResponse,
     BitoOrderRequest,
@@ -10,11 +10,6 @@ import {
     BitoWalletBalanceResponse,
     BitoOrderStatus
 } from './bitoTypes.js';
-import { logger } from '../utils/logger.js';
-import { setupApiInterceptors } from './apiInterceptor.js';
-import { MarketDepthResponse, PriceLevel } from '../types/marketDepth.js';
-import { Order, Status } from '../types/order.js';
-import { ExchangeApi } from '../types/exchange.js';
 import { Service } from 'typedi';
 import { BitoApiConfig } from '../config/BitoApiConfig.js';
 
