@@ -1,12 +1,13 @@
 import axios, { AxiosError } from 'axios';
 import { createHmac } from 'crypto';
 import * as qs from 'qs';
-import { OrderRequest, TradingCurrency, logger, setupApiInterceptors, MarketDepthResponse, PriceLevel, Order, Status, ExchangeApi } from '@crypto-slip-maker/shared';
+import { OrderRequest, TradingCurrency, logger, setupApiInterceptors, MarketDepthResponse, PriceLevel, Order, Status, ExchangeApi, ConvertOrderRequest, ConvertOrder, CurrencyCode } from '@crypto-slip-maker/shared';
 import { 
     MaxMarketDepthResponse,
     MaxOrderRequest,
     MaxOrderDetail,
-    MaxWalletBalanceItem
+    MaxWalletBalanceItem,
+    MaxRawConvertOrder
 } from './maxTypes.js';
 import { Service } from 'typedi';
 import { MaxApiConfig } from '../config/MaxApiConfig.js';
@@ -179,6 +180,82 @@ export class MaxApi implements ExchangeApi {
             return this.convertToOrder(response.data);
         } catch (error) {
             this.handleApiError('Error fetching order detail', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Converts raw MAX Convert order response to domain ConvertOrder abstraction
+     */
+    private convertToDomainConvertOrder(raw: MaxRawConvertOrder): ConvertOrder {
+        return {
+            id: raw.sn,
+            fromCurrency: raw.from_currency.toLowerCase() as CurrencyCode,
+            fromAmount: parseFloat(raw.from_amount),
+            toCurrency: raw.to_currency.toLowerCase() as CurrencyCode,
+            toAmount: parseFloat(raw.to_amount),
+            fee: parseFloat(raw.fee),
+            feeCurrency: raw.fee_currency.toLowerCase() as CurrencyCode,
+            feeInTwd: parseFloat(raw.fee_in_twd),
+            createdAt: new Date(raw.created_at * 1000)
+        };
+    }
+
+    async createConvertOrder(request: ConvertOrderRequest): Promise<ConvertOrder> {
+        try {
+            const path = '/api/v3/convert';
+            const payloadObj: Record<string, any> = {
+                nonce: Date.now(),
+                path,
+                from_currency: request.fromCurrency.toLowerCase(),
+                to_currency: request.toCurrency.toLowerCase()
+            };
+
+            if (request.fromAmount !== undefined) {
+                payloadObj.from_amount = request.fromAmount.toString();
+            }
+            if (request.toAmount !== undefined) {
+                payloadObj.to_amount = request.toAmount.toString();
+            }
+
+            const response = await this.axiosInstance.post<MaxRawConvertOrder>(
+                path,
+                payloadObj,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.generateAuthHeaders(payloadObj)
+                    }
+                }
+            );
+
+            return this.convertToDomainConvertOrder(response.data);
+        } catch (error) {
+            this.handleApiError('Error creating convert order', error);
+            throw error;
+        }
+    }
+
+    async getConvertOrderDetail(id: string): Promise<ConvertOrder> {
+        try {
+            const path = '/api/v3/convert';
+            const payloadObj = {
+                nonce: Date.now(),
+                path,
+                sn: id
+            };
+
+            const response = await this.axiosInstance.get<MaxRawConvertOrder>(
+                path,
+                {
+                    params: payloadObj,
+                    headers: this.generateAuthHeaders(payloadObj)
+                }
+            );
+
+            return this.convertToDomainConvertOrder(response.data);
+        } catch (error) {
+            this.handleApiError('Error fetching convert order detail', error);
             throw error;
         }
     }

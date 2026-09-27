@@ -59,3 +59,22 @@ export interface MaxUserInfoResponse {
     current_vip_level: VipLevel;
     next_vip_level: VipLevel;
 }
+
+export interface MaxRawConvertRequest {
+    from_currency: string;
+    to_currency: string;
+    from_amount?: string;
+    to_amount?: string;
+}
+
+export interface MaxRawConvertOrder {
+    sn: string;
+    from_currency: string;
+    from_amount: string;
+    to_currency: string;
+    to_amount: string;
+    fee: string;
+    fee_currency: string;
+    fee_in_twd: string;
+    created_at: number;
+}

@@ -6,7 +6,7 @@
  * Exchange name identifier
  * Represents the three supported exchanges
  */
-export type ExchangeName = 'Max' | 'Bito' | 'Hoya';
+export type ExchangeName = 'Max' | 'Bito' | 'Hoya' | 'MaxConvert';
 
 /**
  * Execution result for a single exchange

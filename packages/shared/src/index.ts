@@ -8,3 +8,4 @@ export * from './types/exchange.js';
 export * from './types/executionResult.js';
 export * from './types/marketDepth.js';
 export * from './types/order.js';
+export * from './types/convert.js';

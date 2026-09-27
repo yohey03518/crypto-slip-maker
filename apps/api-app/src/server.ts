@@ -1,13 +1,15 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
 import { config } from 'dotenv';
+import { resolve } from 'path';
 import { logger, LineNotificationService, loadAndValidateLineConfig } from '@crypto-slip-maker/shared';
 import type { ExecutionResult, ExchangeName } from '@crypto-slip-maker/shared';
 import { MaxSlipService } from './services/MaxSlipService.js';
+import { MaxConvertService } from './services/MaxConvertService.js';
 import { BitoSlipService } from './services/BitoSlipService.js';
 
 // Load environment variables
-config();
+config({ path: resolve(process.cwd(), '../../.env') });
 
 async function main(): Promise<void> {
   try {
@@ -21,6 +23,10 @@ async function main(): Promise<void> {
       servicesConfig.push({ name: 'Max', service: Container.get(MaxSlipService) });
     }
 
+    if (process.env.RUN_MAX_CONVERT === 'true') {
+      servicesConfig.push({ name: 'MaxConvert', service: Container.get(MaxConvertService) });
+    }
+
     if (process.env.RUN_BITO === 'true') {
       servicesConfig.push({ name: 'Bito', service: Container.get(BitoSlipService) });
     }
@@ -31,7 +37,7 @@ async function main(): Promise<void> {
 
     // Handle case where no exchanges are enabled
     if (servicesConfig.length === 0) {
-      logger.info('No services enabled. Please check RUN_MAX, RUN_BITO, and RUN_HOYA environment variables.');
+      logger.info('No services enabled.');
       return;
     }
 

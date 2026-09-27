@@ -85,6 +85,12 @@ docker run --env-file .env playwright-app
 
 ---
 
+## Terminology (名詞解釋)
+
+* **`Convert`**: 等同於「閃兌」（即時跨幣種兌換功能，無需掛單搓合，每次交易以即時報價立即成交）。在 MAX 交易所中對應 Convert API。
+
+---
+
 ## Environment Variables
 
 ### Exchange Configuration
@@ -92,7 +98,8 @@ docker run --env-file .env playwright-app
 Configure which exchanges to run and their API credentials:
 
 #### Max Exchange
-* `RUN_MAX`: Enable Max exchange (true/false)
+* `RUN_MAX`: Enable Max exchange regular spot trading (true/false)
+* `RUN_MAX_CONVERT`: Enable Max exchange Convert (閃兌) trading (true/false)
 * `MAX_API_BASE_URL`: Max exchange API base URL (default: https://max-api.maicoin.com)
 * `MAX_ACCESS_KEY`: Max exchange API access key
 * `MAX_SECRET_KEY`: Max exchange API secret key
