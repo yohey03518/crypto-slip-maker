@@ -4,7 +4,7 @@ import { logger } from '@crypto-slip-maker/shared';
 
 @Service()
 export class MaxConvertService {
-    private readonly targetUsdtAmount = 4;
+    private readonly targetUsdtAmount = 3;
 
     constructor(
         private readonly maxApi: MaxApi
@@ -14,7 +14,7 @@ export class MaxConvertService {
         try {
             logger.info(`Starting Max Convert (閃兌): Converting TWD to ${this.targetUsdtAmount} USDT...`);
             
-            // Step 1: 買入 4 USDT from TWD
+            // Step 1: 買入 USDT from TWD
             const buyConvertOrder = await this.maxApi.createConvertOrder({
                 fromCurrency: 'twd',
                 toCurrency: 'usdt',
